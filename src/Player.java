@@ -23,9 +23,8 @@ public class Player extends MovingObject implements KeyListener {
     @Override
     public void onUpdate() {
         this.calculateNewPosition();
-        Game.moveCamera(x, y, width, height);
-        //Game.scrollLevel = (int) x/64;
         this.textureXOffset = -Game.scrollLevel * Tiles.TILE_WIDTH;
+        Game.moveCamera(x + textureXOffset, y, width, height);
     }
 
     //TODO: Fix dead stop on landing bug.

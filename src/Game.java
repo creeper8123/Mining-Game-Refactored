@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -11,6 +12,7 @@ public class Game{
     public Timer mainGameLoop;
     public static Tiles.Tile[][] tiles;
     public static Tiles.TileGraphics[] chunks;
+    public static BufferedImage[] chunkTextures;
     protected static Dimension screenSize;
     public static ArrayList<MovingObject> movingObjects = new ArrayList<>();
     protected static int scrollLevel = 0;
@@ -52,19 +54,41 @@ public class Game{
 
         chunks = new Tiles.TileGraphics[(layeredPane.getWidth()/Tiles.TILE_WIDTH) + 5];//tiles.length
         System.out.println();
-        System.out.println("Beginning chunk texture stitching...");
+        System.out.println("Beginning spawn chunk texture stitching...");
         startTime = System.nanoTime();
+        chunkTextures = new BufferedImage[tiles.length];
         for (int i = 0; i < chunks.length; i++) {
             System.out.printf("%07.3f%%\n", ((double) (i*100)/chunks.length));
             chunks[i] = new Tiles.TileGraphics();
             chunks[i].textureLabel.setLocation(i* Tiles.TILE_WIDTH, 0);
-            chunks[i].redrawChunk(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(chunks[i].stitchChunk(i)), 4));
+            chunkTextures[i] = ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(chunks[0].stitchChunk(i)), 4);
+            chunks[i].redrawChunk(chunkTextures[i]);
         }
         System.out.println("100.000%");
-        System.out.println("Chunk texture stitching complete");
+        System.out.println("Spawn chunk texture stitching complete");
         System.out.println("Completed in " + (int) ((System.nanoTime() - startTime)*0.000001) + " Milliseconds");
 
         movingObjects.add(new Player(0 * Tiles.TILE_WIDTH, 0 * Tiles.TILE_HEIGHT));
+
+        Thread generateOtherTextures = new Thread(() -> {
+            try {
+                Thread.sleep(0, 1); //Done exclusively to print the console in the correct order >:)
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println();
+            System.out.println("Beginning non-spawn chunk texture stitching...");
+            long startTime1 = System.nanoTime();
+            for (int i = chunks.length; i < chunkTextures.length; i++) {
+                System.out.printf("%07.3f%%\n", ((double) ((i - chunks.length)*100)/(chunkTextures.length - chunks.length)));
+                chunkTextures[i] = ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(chunks[0].stitchChunk(i)), 4);
+            }
+            System.out.println("100.000%");
+            System.out.println("Non-spawn chunk texture stitching complete");
+            System.out.println("Completed in " + (int) ((System.nanoTime() - startTime1)*0.000001) + " Milliseconds");
+        });
+
+        generateOtherTextures.start();
 
         mainGameLoop = new Timer();
         mainGameLoop.scheduleAtFixedRate(new TimerTask() {
@@ -80,10 +104,17 @@ public class Game{
     }
 
     public static void moveCamera(double x, double y, int width, int height){
+        /*
+        if(x > 700){
+            scrollLevel++;
+        }else if(x < 500 && scrollLevel > 0){
+            scrollLevel--;
+        }
+         */
+
         int paneNewX = ((int) -Math.round(x)) + ((frame.getWidth() - width)/2);
         int paneNewY = ((int) -Math.round(y)) + ((frame.getHeight() - height)/2);
 
-        /*
         if(paneNewX > 0){
             paneNewX = 0;
         }else if(paneNewX < frame.getWidth() - layeredPane.getWidth() - (width/2)){
@@ -95,8 +126,6 @@ public class Game{
         }else if(paneNewY < frame.getHeight() - layeredPane.getHeight() - (height/2)){
             paneNewY = frame.getHeight() - layeredPane.getHeight() - (height/2);
         }
-
-         */
 
         layeredPane.setLocation(paneNewX, paneNewY);
     }
