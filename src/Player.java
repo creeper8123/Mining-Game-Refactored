@@ -20,11 +20,13 @@ public class Player extends MovingObject implements KeyListener {
     boolean rightPressed;
     boolean sprintPressed;
 
+    Tiles.Tile[] inventory = new Tiles.Tile[20];
+    int[] inventoryQuantity = new int[20];
+
     @Override
     public void onUpdate() {
         this.calculateNewPosition();
-        this.textureXOffset = -Game.scrollLevel * Tiles.TILE_WIDTH;
-        Game.moveCamera(x + textureXOffset, y, width, height);
+        Game.moveCamera(x, y, width, height);
     }
 
     //TODO: Fix dead stop on landing bug.
@@ -61,6 +63,42 @@ public class Player extends MovingObject implements KeyListener {
         if(upPressed && onGround){
             ySpeed = -jumpForce; //Jump if the player is on the ground and the jump key is pressed.
         }
+    }
+
+    void boundsCheck() {
+        if (x < 0) {
+            x = 0;
+            hitbox.x = 0;
+            xSpeed = 0;
+        } else if (x > Game.layeredPane.getWidth() - width) {
+            int frameWidth = Game.layeredPane.getWidth() - width;
+            x = frameWidth;
+            hitbox.x = frameWidth;
+            xSpeed = 0;
+        }
+
+        if (y < 0) {
+            y = 0;
+            hitbox.y = 0;
+            ySpeed = 0;
+        } else if (y > Game.layeredPane.getHeight() - height) {
+            int frameHeight = Game.layeredPane.getHeight() - height;
+            y = frameHeight;
+            hitbox.y = frameHeight;
+            ySpeed = 0;
+        }
+    }
+
+    @Override
+    public void calculateNewPosition(){
+        setTargetSpeed();
+        applySpeedDeadzone();
+        applyGravity();
+        collisionDetection();
+        checkOnGround();
+        applyJumpForce();
+        boundsCheck();
+        confirmPosition();
     }
 
     @Override

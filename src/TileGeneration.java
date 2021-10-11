@@ -6,9 +6,9 @@ public interface TileGeneration {
     Tiles.Tile[][] generatePortals(Tiles.Tile[][] tiles);
     Tiles.Tile[][] generateDetails(Tiles.Tile[][] tiles);
 
-    default Tiles.Tile[][] generate(Tiles.Tile[][] tiles){
+    default Tiles.Tile[][] generate(Tiles.Tile[][] tiles, String levelName){
         System.out.println();
-        System.out.println("Beginning map generation...");
+        System.out.println("Beginning " + levelName + " map generation...");
         long startTime = System.nanoTime();
         tiles = generateBase(tiles);
         tiles = generateOres(tiles);

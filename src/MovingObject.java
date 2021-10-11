@@ -47,7 +47,7 @@ public abstract class MovingObject {
     double xSpeedAcceleration = 0.15;
     double xSpeedLimit = 5.0;
     double sprintSpeedMultiplier = 1.5;
-    double jumpForce = 10.0;
+    double jumpForce = 12.5;
     double terminalVelocity = 25.0;
     double airborneManeuverabilityMultiplier = 0.25;
     double speedDeadZone = 0.1;
@@ -115,10 +115,10 @@ public abstract class MovingObject {
 
         final int COLLISION_RANGE = 2;
 
-        int minX = (int) Math.round((x / Tiles.TILE_WIDTH) - COLLISION_RANGE);
-        int maxX = (int) Math.round((x / Tiles.TILE_WIDTH) + COLLISION_RANGE);
-        int minY = (int) Math.round((y / Tiles.TILE_HEIGHT) - COLLISION_RANGE);
-        int maxY = (int) Math.round((y / Tiles.TILE_HEIGHT) + COLLISION_RANGE);
+        int minX = (int) Math.round(((double) hitbox.x / Tiles.TILE_WIDTH) - COLLISION_RANGE);
+        int maxX = (int) Math.round(((double) hitbox.x / Tiles.TILE_WIDTH) + COLLISION_RANGE);
+        int minY = (int) Math.round(((double) hitbox.y / Tiles.TILE_HEIGHT) - COLLISION_RANGE);
+        int maxY = (int) Math.round(((double) hitbox.y / Tiles.TILE_HEIGHT) + COLLISION_RANGE);
 
         if(minX < COLLISION_RANGE){
             minX = 0;
@@ -178,10 +178,10 @@ public abstract class MovingObject {
     void checkOnGround(){
         final int COLLISION_RANGE = 2;
 
-        int minX = (int) Math.round((x / Tiles.TILE_WIDTH) - COLLISION_RANGE);
-        int maxX = (int) Math.round((x / Tiles.TILE_WIDTH) + COLLISION_RANGE);
-        int minY = (int) Math.round((y / Tiles.TILE_HEIGHT) - COLLISION_RANGE);
-        int maxY = (int) Math.round((y / Tiles.TILE_HEIGHT) + COLLISION_RANGE);
+        int minX = (int) Math.round(((double) hitbox.x / Tiles.TILE_WIDTH) - COLLISION_RANGE);
+        int maxX = (int) Math.round(((double) hitbox.x / Tiles.TILE_WIDTH) + COLLISION_RANGE);
+        int minY = (int) Math.round(((double) hitbox.y / Tiles.TILE_HEIGHT) - COLLISION_RANGE);
+        int maxY = (int) Math.round(((double) hitbox.y / Tiles.TILE_HEIGHT) + COLLISION_RANGE);
 
         if(minX < COLLISION_RANGE){
             minX = 0;
@@ -231,30 +231,6 @@ public abstract class MovingObject {
         textureLabel.setLocation(((int) Math.round(x))+textureXOffset, ((int) Math.round(y))+textureYOffset);
     }
 
-    void boundsCheck(){
-        if(x < 0){
-            x = 0;
-            hitbox.x = 0;
-            xSpeed = 0;
-        }else if(x > Game.layeredPane.getWidth() - width){
-            int frameWidth = Game.layeredPane.getWidth() - width;
-            x = frameWidth;
-            hitbox.x = frameWidth;
-            xSpeed = 0;
-        }
-
-        if(y < 0){
-            y = 0;
-            hitbox.y = 0;
-            ySpeed = 0;
-        }else if(y > Game.layeredPane.getHeight() - height){
-            int frameHeight = Game.layeredPane.getHeight() - height;
-            y = frameHeight;
-            hitbox.y = frameHeight;
-            ySpeed = 0;
-        }
-    }
-
     public void calculateNewPosition(){
         setTargetSpeed();
         applySpeedDeadzone();
@@ -263,7 +239,6 @@ public abstract class MovingObject {
         checkOnGround();
         applyJumpForce();
         confirmPosition();
-        boundsCheck();
     }
 
     void onUpdate(){

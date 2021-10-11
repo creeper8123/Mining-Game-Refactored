@@ -17,7 +17,7 @@ public class Tiles {
         public static final int TILE_LAYER = 1;
 
         public JLabel textureLabel;
-        public Image texture;
+        public BufferedImage texture;
 
         public TileGraphics(){
             textureLabel = new JLabel();
@@ -42,7 +42,6 @@ public class Tiles {
              */
         }
 
-        //TODO: Generate all chunk textures upon world creation, then slot in the preloaded as needed.
         public Image stitchChunk(int chunkX){
 
             BufferedImage chunkTexture = new BufferedImage(TILE_BASE_WIDTH, Game.tiles[0].length * TILE_BASE_HEIGHT, 6);
@@ -74,39 +73,43 @@ public class Tiles {
                         chunkTexture.setRGB(x, y, col);
                     }
                 }
-            texture = ImageProcessing.bufferedImageToImage(chunkTexture);
+            this.texture = chunkTexture;
             return texture;
         }
 
         //Re-draw one tile in the chunk without re-drawing the entire chunk
-        public void modifyChunk(int x, int y, boolean isBroken){
-            BufferedImage workingTexture;
-            if(isBroken){
-                workingTexture = Game.tiles[x][y].textureBackground;
-            }else{
-                workingTexture = Game.tiles[x][y].texture;
-            }
+        public void modifyChunk(int x, ArrayList<Integer> yValues){
 
-            BufferedImage chunkTexture = ImageProcessing.imageToBufferedImage(texture);
+
+            BufferedImage chunkTexture = Game.chunkTextures[x];
 
             int a;// red component 0...255
             int r;// = 255;// red component 0...255
             int g;// = 0;// green component 0...255
             int b;// = 0;// blue component 0...255
             int col;// = ((a&0x0ff)<<24)|((r&0x0ff)<<16)|((g&0x0ff)<<8)|(b&0x0ff);
-            for (int loopX = 0; loopX < workingTexture.getWidth(); loopX++) {
-                for (int loopY = y * TILE_BASE_HEIGHT; loopY < workingTexture.getHeight() + (y * TILE_BASE_HEIGHT); loopY++) {
-                    Color myColour = new Color(workingTexture.getRGB(loopX, loopY - (y * TILE_BASE_HEIGHT)));
-                    a = myColour.getAlpha();
-                    r = myColour.getRed();
-                    g = myColour.getGreen();
-                    b = myColour.getBlue();
-                    col = ((a&0x0ff)<<24)|((r&0x0ff)<<16)|((g&0x0ff)<<8)|(b&0x0ff);
-                    chunkTexture.setRGB(loopX, loopY, col);
+            for (Integer y : yValues) {
+                BufferedImage workingTexture;
+                if(Game.tiles[x][y].isBroken){
+                    workingTexture = ImageProcessing.resizeImage(Game.tiles[x][y].textureBackground, 4);
+                }else{
+                    workingTexture = ImageProcessing.resizeImage(Game.tiles[x][y].texture, 4);
+                }
+                for (int loopX = 0; loopX < workingTexture.getWidth(); loopX++) {
+                    for (int loopY = y * TILE_HEIGHT; loopY < workingTexture.getHeight() + (y * TILE_HEIGHT); loopY++) {
+                        Color myColour = new Color(workingTexture.getRGB(loopX, loopY - (y * TILE_HEIGHT)));
+                        a = myColour.getAlpha();
+                        r = myColour.getRed();
+                        g = myColour.getGreen();
+                        b = myColour.getBlue();
+                        col = ((a & 0x0ff) << 24) | ((r & 0x0ff) << 16) | ((g & 0x0ff) << 8) | (b & 0x0ff);
+                        chunkTexture.setRGB(loopX, loopY, col);
+                    }
                 }
             }
+
             texture = chunkTexture;
-            redrawChunk(ImageProcessing.resizeImage(chunkTexture, 4));
+            redrawChunk(chunkTexture);
         }
 
 
@@ -120,17 +123,25 @@ public class Tiles {
             int playerMiddleX = (int) Game.movingObjects.get(0).x + (Player.PLAYER_WIDTH/2);
             int playerMiddleY = (int) Game.movingObjects.get(0).y + (Player.PLAYER_HEIGHT/2);
             if(Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)) < Player.PLAYER_REACH){
+                ArrayList<Integer> yValues = new ArrayList<>();
                 if(Game.tiles[x][y].canBeBroken){
                     Game.tiles[x][y].isBroken = true;
+                    yValues.add(y);
                     if(y < Game.tiles[x].length){
                         if(Game.tiles[x][y+1].tileID == Tile.TILE_STALACTITE){
                             Game.tiles[x][y+1].isBroken = true;
                             Game.movingObjects.add(new FallingStalactite(x * TILE_WIDTH, (y+1) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT));
+                            yValues.add(y+1);
+                        }
+                    }
+                    if(y > 0){
+                        if(Game.tiles[x][y-1].tileID == Tile.TILE_STALAGMITE){
+                            Game.tiles[x][y-1].isBroken = true;
+                            yValues.add(y-1);
                         }
                     }
                 }
-                modifyChunk(x, y, Game.tiles[x][y].isBroken);
-                modifyChunk(x, y+1, Game.tiles[x][y+1].isBroken);
+                modifyChunk(x, yValues);
             }
         }
 
@@ -423,20 +434,38 @@ public class Tiles {
 
             @Override
             public Tile[][] generateWorldFloor(Tile[][] tiles) {
+                System.out.println();
+                System.out.println("Beginning Overworld floor generation...");
+                long startTime = System.nanoTime();
+
                 for (int x = 0; x < Game.tiles.length; x++) {
                     tiles[x][Game.tiles[x].length-1].isBroken = false;
                     tiles[x][Game.tiles[x].length-1].canBeBroken = false;
                 }
+
+                System.out.println("Overworld floor generation complete");
+                System.out.println("Completed in " + (int) ((System.nanoTime() - startTime)*0.000001) + " Milliseconds");
                 return tiles;
             }
 
             @Override
             public Tile[][] generatePortals(Tile[][] tiles) {
+                System.out.println();
+                System.out.println("Beginning Overworld portal generation...");
+                long startTime = System.nanoTime();
+
+
+
+                System.out.println("Overworld portal generation complete");
+                System.out.println("Completed in " + (int) ((System.nanoTime() - startTime)*0.000001) + " Milliseconds");
                 return tiles;
             }
 
             @Override
             public Tile[][] generateDetails(Tile[][] tiles) {
+                System.out.println();
+                System.out.println("Beginning Overworld detail generation...");
+                long startTime = System.nanoTime();
 
                 final double STALACTITE_CHANCE = 0.1;
                 final double STALAGMITE_CHANCE = 0.1;
@@ -457,6 +486,8 @@ public class Tiles {
                         }
                     }
                 }
+                System.out.println("Overworld detail generation complete");
+                System.out.println("Completed in " + (int) ((System.nanoTime() - startTime)*0.000001) + " Milliseconds");
                 return tiles;
             }
 

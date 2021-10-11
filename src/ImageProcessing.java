@@ -105,7 +105,6 @@ public class ImageProcessing {
         return newImage;
     }
 
-    //TODO: This step, or steps before it, are causing null images to appear black.
     public static BufferedImage resizeImage(BufferedImage inputBufferedImage, int scaleFactor){
         return ImageProcessing.imageToBufferedImage(inputBufferedImage.getScaledInstance(inputBufferedImage.getWidth() * scaleFactor, inputBufferedImage.getHeight() * scaleFactor, Image.SCALE_REPLICATE));
     }
