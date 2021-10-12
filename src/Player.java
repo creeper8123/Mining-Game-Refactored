@@ -9,8 +9,7 @@ public class Player extends MovingObject implements KeyListener {
     public static final double PLAYER_REACH = 256;
 
     public Player(double initialX, double initialY){
-        super(initialX, initialY, PLAYER_WIDTH, PLAYER_HEIGHT);
-        textureLabel.setIcon(new ImageIcon(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources("textures/missingTexture.png")), 4)));
+        super(initialX, initialY, 0, PLAYER_WIDTH, PLAYER_HEIGHT, "textures/missingTexture.png");
         Game.frame.addKeyListener(this);
     }
 

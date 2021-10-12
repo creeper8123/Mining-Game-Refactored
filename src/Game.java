@@ -2,11 +2,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class Game{
     public static final long MILLISECONDS_PER_UPDATE = 16;
+    public static final Random WORLD_RANDOM = new Random();
     public static JFrame frame = new JFrame();
     public static JLayeredPane layeredPane = new JLayeredPane();
     public Timer mainGameLoop;
@@ -16,6 +18,7 @@ public class Game{
     protected static Dimension screenSize;
     public static ArrayList<MovingObject> movingObjects = new ArrayList<>();
     private final int spawnChunksLength;
+    private final int randomSelectionsPerChunkPerUpdate = 3;
 
     public Game(){
         tiles = new Tiles.Tile[256][256];
@@ -43,7 +46,7 @@ public class Game{
         System.out.println("Beginning Tile texture generation...");
         long startTime = System.nanoTime();
         for (int x = 0; x < tiles.length; x++) {
-            System.out.printf("%07.3f%% (%0" + String.valueOf(tiles.length * tiles[0].length).length() + "d/%0" + String.valueOf(tiles.length * tiles[0].length).length() + "d)\n", ((double) (x*100)/ tiles.length), x * tiles.length, tiles.length * tiles[0].length); //Don't move to y loop, will double time to generate textures due to printing
+            System.out.printf("%07.3f%% (%0" + String.valueOf(tiles.length * tiles[0].length).length() + "d/%0" + String.valueOf(tiles.length * tiles[0].length).length() + "d)\n", ((double) (x*100)/ tiles.length), x * tiles[0].length, tiles.length * tiles[0].length); //Don't move to y loop, will double time to generate textures due to printing
             for (int y = 0; y < tiles[x].length; y++) {
                 tiles[x][y].generateTileTextures();
             }
@@ -58,7 +61,7 @@ public class Game{
 
         int playerSpawnX = 0;
         for (int y = 0; y < tiles[playerSpawnX].length; y++) {
-            if(!tiles[playerSpawnX][y].isBroken && tiles[playerSpawnX][y].tileID != 0){
+            if(!tiles[playerSpawnX][y].isBroken && tiles[playerSpawnX][y].itemID != ItemID.TILE_AIR){
                 movingObjects.add(new Player(playerSpawnX * Tiles.TILE_WIDTH, (y * Tiles.TILE_HEIGHT)-Player.PLAYER_HEIGHT));
                 break;
             }
@@ -93,6 +96,12 @@ public class Game{
                 /*------------------------------------BEGIN MAIN LOOP------------------------------------*/
                 for (int i = 0; i < movingObjects.size(); i++) {
                     movingObjects.get(i).onUpdate();
+                }
+                for (int x = 0; x < tiles.length; x++) {
+                    for (int i = 0; i < randomSelectionsPerChunkPerUpdate; i++) {
+                        int y = (int) Math.floor(Math.random() * tiles[x].length);
+                        tiles[x][y].onRandomUpdate(tiles, x, y);
+                    }
                 }
                 /*-------------------------------------END MAIN LOOP-------------------------------------*/
             }

@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 
 public abstract class MovingObject {
-    public MovingObject(double x, double y, int width, int height){
+    public MovingObject(double x, double y, int z, int width, int height, String textureLocation){
         this.x = x;
         this.y = y;
 
@@ -13,11 +13,10 @@ public abstract class MovingObject {
 
         this.textureLabel = new JLabel();
         this.textureLabel.setBounds(hitbox);
-        this.textureLabel.setIcon(new ImageIcon(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources("textures/missingTexture.png")), 4)));
+        this.textureLabel.setIcon(new ImageIcon(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources(textureLocation)), 4)));
         Game.layeredPane.add(textureLabel);
         Game.layeredPane.setLayer(textureLabel, MovingObject.MOVING_OBJECT_LAYER);
     }
-
 
     static final int MOVING_OBJECT_LAYER = 3;
 
@@ -28,6 +27,7 @@ public abstract class MovingObject {
 
     double x;
     double y;
+    int z;
 
     Rectangle hitbox;
     JLabel textureLabel;
@@ -44,14 +44,14 @@ public abstract class MovingObject {
     double ySpeed = 0.0;
     double xSpeedTarget = 0.0;
     double ySpeedTarget = 0.0;
-    double xSpeedAcceleration = 0.15;
-    double xSpeedLimit = 5.0;
-    double sprintSpeedMultiplier = 1.5;
+    double xSpeedAcceleration = 0.01 * Game.MILLISECONDS_PER_UPDATE;
+    double xSpeedLimit = 0.3125 * Game.MILLISECONDS_PER_UPDATE;
+    double sprintSpeedMultiplier = 1.33;
     double jumpForce = 12.5;
-    double terminalVelocity = 25.0;
+    double terminalVelocity = 1.5625 * Game.MILLISECONDS_PER_UPDATE;
     double airborneManeuverabilityMultiplier = 0.25;
-    double speedDeadZone = 0.1;
-    double gravity = 0.4;
+    double speedDeadZone = 0.00625 * Game.MILLISECONDS_PER_UPDATE;
+    double gravity = 0.025 * Game.MILLISECONDS_PER_UPDATE;
 
     boolean canSprint = true;
     boolean hasGravity = true;
@@ -141,7 +141,7 @@ public abstract class MovingObject {
             hitbox.x += xSpeed;
             for (int i = minX; i <= maxX; i++) {
                 for (int j = minY; j <= maxY; j++) {
-                    if(hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].tileID != Tiles.Tile.TILE_AIR && !Game.tiles[i][j].isBroken){
+                    if(hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].itemID != ItemID.TILE_AIR && !Game.tiles[i][j].isBroken){
                         hitbox.x -= xSpeed;
                         horizontalTileCollisionDetected = true;
                         while (!hitbox.intersects(Game.tiles[i][j].hitbox)) {
@@ -160,7 +160,7 @@ public abstract class MovingObject {
             hitbox.y += ySpeed;
             for (int i = minX; i <= maxX; i++) {
                 for (int j = minY; j <= maxY; j++) {
-                    if(hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].tileID != Tiles.Tile.TILE_AIR && !Game.tiles[i][j].isBroken){
+                    if(hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].itemID != ItemID.TILE_AIR && !Game.tiles[i][j].isBroken){
                         hitbox.y -= ySpeed;
                         verticalTileCollisionDetected = true;
                         while (!hitbox.intersects(Game.tiles[i][j].hitbox)) {
@@ -203,7 +203,7 @@ public abstract class MovingObject {
         for (int i = minX; i <= maxX; i++) {
             boolean broken = false;
             for (int j = minY; j <= maxY; j++) {
-                if (hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].tileID != Tiles.Tile.TILE_AIR && !Game.tiles[i][j].isBroken) {
+                if (hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].itemID != ItemID.TILE_AIR && !Game.tiles[i][j].isBroken) {
                     onGround = true;
                     broken = true;
                     break;
