@@ -8,8 +8,14 @@ public class Player extends MovingObject implements KeyListener {
     public static final int PLAYER_HEIGHT = 48;
     public static final double PLAYER_REACH = 256;
 
+
     public Player(double initialX, double initialY){
         super(initialX, initialY, 0, PLAYER_WIDTH, PLAYER_HEIGHT, "textures/missingTexture.png");
+    }
+
+
+    @Override
+    public void postInitialization(){
         Game.frame.addKeyListener(this);
     }
 
@@ -22,16 +28,18 @@ public class Player extends MovingObject implements KeyListener {
     Tiles.Tile[] inventory = new Tiles.Tile[20];
     int[] inventoryQuantity = new int[20];
 
+
     @Override
     public void onUpdate() {
         this.calculateNewPosition();
         Game.moveCamera(x, y, width, height);
     }
 
+
     //TODO: Fix dead stop on landing bug.
     //To recreate: jump twice without releasing jump button, will stop dead upon landing.
     //Related: Some jumps are higher than others. Easiest to replicate on all flat terrain (IE bottom of the world)
-        //Dead stop only happens on the higher jumps
+    //Dead stop only happens on the higher jumps
     @Override
     void setTargetSpeed() {
         if(leftPressed ^ rightPressed){
@@ -57,12 +65,14 @@ public class Player extends MovingObject implements KeyListener {
         }
     }
 
+
     @Override
     void applyJumpForce(){
         if(upPressed && onGround){
             ySpeed = -jumpForce; //Jump if the player is on the ground and the jump key is pressed.
         }
     }
+
 
     void boundsCheck() {
         if (x < 0) {
@@ -88,6 +98,7 @@ public class Player extends MovingObject implements KeyListener {
         }
     }
 
+
     @Override
     public void calculateNewPosition(){
         setTargetSpeed();
@@ -100,10 +111,12 @@ public class Player extends MovingObject implements KeyListener {
         confirmPosition();
     }
 
+
     @Override
     public void keyTyped(KeyEvent e) {
 
     }
+
 
     @Override
     public void keyPressed(KeyEvent e) {
@@ -116,6 +129,7 @@ public class Player extends MovingObject implements KeyListener {
         }
     }
 
+
     @Override
     public void keyReleased(KeyEvent e) {
         switch(e.getKeyCode()){
@@ -126,6 +140,7 @@ public class Player extends MovingObject implements KeyListener {
             case 40, 83 -> this.downPressed = false;
         }
     }
+
 
     @Override
     public String toString(){

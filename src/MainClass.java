@@ -6,7 +6,6 @@ public class MainClass {
         Game game = new Game();
 
         System.out.println();
-        System.out.println("Game Started");
-        System.out.println("Started in " + (int) ((System.nanoTime() - startTime)*0.000001) + " Milliseconds");
+        System.out.println("Game Started in " + (int) ((System.nanoTime() - startTime)*0.000001) + " Milliseconds");
     }
 }

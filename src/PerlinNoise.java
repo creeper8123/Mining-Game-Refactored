@@ -6,6 +6,7 @@ public class PerlinNoise{
         protected final ArrayList<Double> values = new ArrayList<>();
         protected final Random random = new Random();
 
+
         public Perlin1D(Long seed){
             if(seed == null){
                 seed = new Random().nextLong();
@@ -13,9 +14,11 @@ public class PerlinNoise{
             random.setSeed(seed);
         }
 
+
         public Perlin1D(){
             random.setSeed(new Random().nextLong());
         }
+
 
         //Connect a straight line between the points, and get the value at that location
         public double linInterpolation(double x){
@@ -27,6 +30,7 @@ public class PerlinNoise{
             x = x % 1;
             return low * (1 - x) + high * x;
         }
+
 
         //Connect a curved line  flattening at the points, and get the value at that location
         public double cosInterpolation(double x){
@@ -41,9 +45,11 @@ public class PerlinNoise{
         }
     }
 
+
     static class Perlin2D{
         protected final ArrayList<Perlin1D> per1D = new ArrayList<>();
         protected final Random random = new Random();
+
 
         public Perlin2D(Long seed){
             if(seed == null){
@@ -52,9 +58,11 @@ public class PerlinNoise{
             random.setSeed(seed);
         }
 
+
         public Perlin2D(){
             random.setSeed(new Random().nextLong());
         }
+
 
         //Connect a straight line between the points, and get the value at that location
         public double linInterpolation(double x, double y){
@@ -66,6 +74,7 @@ public class PerlinNoise{
             y = y % 1;
             return low * (1 - y) + high * y;
         }
+
 
         //Connect a curved line  flattening at the points, and get the value at that location
         public double cosInterpolation(double x, double y){
@@ -80,9 +89,11 @@ public class PerlinNoise{
         }
     }
 
+
     static class Perlin3D{
         protected final ArrayList<Perlin2D> per2D = new ArrayList<>();
         protected final Random random = new Random();
+
 
         public Perlin3D(Long seed){
             if(seed == null){
@@ -91,9 +102,11 @@ public class PerlinNoise{
             random.setSeed(seed);
         }
 
+
         public Perlin3D(){
             random.setSeed(new Random().nextLong());
         }
+
 
         //Connect a straight line between the points, and get the value at that location
         public double linInterpolation(double x, double y, double z){
@@ -105,6 +118,7 @@ public class PerlinNoise{
             z = z % 1;
             return low * (1 - z) + high * z;
         }
+
 
         //Connect a curved line  flattening at the points, and get the value at that location
         public double cosInterpolation(double x, double y, double z){
@@ -119,9 +133,11 @@ public class PerlinNoise{
         }
     }
 
+
     static class Perlin4D{
         protected final ArrayList<Perlin3D> per3D = new ArrayList<>();
         protected final Random random = new Random();
+
 
         public Perlin4D(Long seed){
             if(seed == null){
@@ -130,9 +146,11 @@ public class PerlinNoise{
             random.setSeed(seed);
         }
 
+
         public Perlin4D(){
             random.setSeed(new Random().nextLong());
         }
+
 
         //Connect a straight line between the points, and get the value at that location
         public double linInterpolation(double x, double y, double z, double t){
@@ -144,6 +162,7 @@ public class PerlinNoise{
             t = t % 1;
             return low * (1 - t) + high * t;
         }
+
 
         //Connect a curved line  flattening at the points, and get the value at that location
         public double cosInterpolation(double x, double y, double z, double t){

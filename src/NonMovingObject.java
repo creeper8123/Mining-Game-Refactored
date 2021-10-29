@@ -5,6 +5,7 @@ public abstract class NonMovingObject {
     BufferedImage texture;
     ItemID itemID;
 
+
     public BufferedImage generateTexture(ItemID itemID){
         switch(itemID){
             case TILE_AIR -> {
@@ -119,6 +120,20 @@ public abstract class NonMovingObject {
                 BufferedImage baseStoneTexture = ImageProcessing.rotateImageRandomly(ImageProcessing.getImageFromResources(stoneRandom.get((int) (Game.WORLD_RANDOM.nextDouble() * stoneRandom.size()))), (int) (Game.WORLD_RANDOM.nextDouble() * 4));
                 BufferedImage baseCoalTexture = ImageProcessing.rotateImageRandomly(ImageProcessing.getImageFromResources(diamondRandom.get((int) (Game.WORLD_RANDOM.nextDouble() * diamondRandom.size()))), (int) (Game.WORLD_RANDOM.nextDouble() * 4));
                 return ImageProcessing.overlayImage(baseStoneTexture, baseCoalTexture);
+            }
+            case TILE_STALACTITE -> {
+                final ArrayList<String> textureRandom = new ArrayList<>();
+                for (int i = 0; i < 5; i++) {
+                    textureRandom.add("textures/tiles/fullTiles/stalactite/stalactite" + i + ".png");
+                }
+                return ImageProcessing.getImageFromResources(textureRandom.get((int) (Game.WORLD_RANDOM.nextDouble() * textureRandom.size())));
+            }
+            case TILE_STALAGMITE -> {
+                final ArrayList<String> textureRandom = new ArrayList<>();
+                for (int i = 0; i < 5; i++) {
+                    textureRandom.add("textures/tiles/fullTiles/stalagmite/stalagmite" + i + ".png");
+                }
+                return ImageProcessing.getImageFromResources(textureRandom.get((int) (Game.WORLD_RANDOM.nextDouble() * textureRandom.size())));
             }
             default -> {
                 return ImageProcessing.getImageFromResources("textures/missingTexture.png");

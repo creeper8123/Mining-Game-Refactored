@@ -16,6 +16,26 @@ public abstract class MovingObject {
         this.textureLabel.setIcon(new ImageIcon(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources(textureLocation)), 4)));
         Game.layeredPane.add(textureLabel);
         Game.layeredPane.setLayer(textureLabel, MovingObject.MOVING_OBJECT_LAYER);
+
+        postInitialization();
+    }
+
+    public abstract void postInitialization();
+
+    public MovingObject(double x, double y, int z, int width, int height, Image newTexture){
+        this.x = x;
+        this.y = y;
+
+        this.width = width;
+        this.height = height;
+
+        this.hitbox = new Rectangle((int) Math.round(x), (int) Math.round(y), width, height);
+
+        this.textureLabel = new JLabel();
+        this.textureLabel.setBounds(hitbox);
+        this.textureLabel.setIcon(new ImageIcon(newTexture));
+        Game.layeredPane.add(textureLabel);
+        Game.layeredPane.setLayer(textureLabel, MovingObject.MOVING_OBJECT_LAYER);
     }
 
     static final int MOVING_OBJECT_LAYER = 3;
@@ -47,7 +67,7 @@ public abstract class MovingObject {
     double xSpeedAcceleration = 0.01 * Game.MILLISECONDS_PER_UPDATE;
     double xSpeedLimit = 0.3125 * Game.MILLISECONDS_PER_UPDATE;
     double sprintSpeedMultiplier = 1.33;
-    double jumpForce = 12.5;
+    double jumpForce = 10;
     double terminalVelocity = 1.5625 * Game.MILLISECONDS_PER_UPDATE;
     double airborneManeuverabilityMultiplier = 0.25;
     double speedDeadZone = 0.00625 * Game.MILLISECONDS_PER_UPDATE;
@@ -58,6 +78,7 @@ public abstract class MovingObject {
     boolean onGround;
     boolean horizontalTileCollisionDetected;
     boolean verticalTileCollisionDetected;
+
 
     void setTargetSpeed(){
         if(left ^ right){
@@ -83,6 +104,7 @@ public abstract class MovingObject {
         }
     }
 
+
     void applySpeedDeadzone(){
          if((Math.abs(xSpeed - xSpeedTarget) < speedDeadZone)){
              xSpeed = xSpeedTarget;
@@ -101,6 +123,7 @@ public abstract class MovingObject {
          }
      }
 
+
     void applyGravity(){
         if(!onGround && hasGravity){
             if(ySpeed < terminalVelocity){
@@ -111,6 +134,12 @@ public abstract class MovingObject {
         }
     }
 
+
+    //TODO: Fix dead stop on landing bug
+    //To recreate: jump twice without releasing jump button, will stop dead upon landing.
+    //Related: Some jumps are higher than others. Easiest to replicate on all flat terrain (IE bottom of the world)
+    //Dead stop only happens on the higher jumps
+    //TODO: Fix twitching when pushing to the right bug.
     void collisionDetection(){
 
         final int COLLISION_RANGE = 2;
@@ -141,7 +170,7 @@ public abstract class MovingObject {
             hitbox.x += xSpeed;
             for (int i = minX; i <= maxX; i++) {
                 for (int j = minY; j <= maxY; j++) {
-                    if(hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].itemID != ItemID.TILE_AIR && !Game.tiles[i][j].isBroken){
+                    if(hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].itemID != ItemID.TILE_AIR){
                         hitbox.x -= xSpeed;
                         horizontalTileCollisionDetected = true;
                         while (!hitbox.intersects(Game.tiles[i][j].hitbox)) {
@@ -160,7 +189,7 @@ public abstract class MovingObject {
             hitbox.y += ySpeed;
             for (int i = minX; i <= maxX; i++) {
                 for (int j = minY; j <= maxY; j++) {
-                    if(hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].itemID != ItemID.TILE_AIR && !Game.tiles[i][j].isBroken){
+                    if(hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].itemID != ItemID.TILE_AIR){
                         hitbox.y -= ySpeed;
                         verticalTileCollisionDetected = true;
                         while (!hitbox.intersects(Game.tiles[i][j].hitbox)) {
@@ -174,6 +203,7 @@ public abstract class MovingObject {
             }
         }
     }
+
 
     void checkOnGround(){
         final int COLLISION_RANGE = 2;
@@ -203,7 +233,7 @@ public abstract class MovingObject {
         for (int i = minX; i <= maxX; i++) {
             boolean broken = false;
             for (int j = minY; j <= maxY; j++) {
-                if (hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].itemID != ItemID.TILE_AIR && !Game.tiles[i][j].isBroken) {
+                if (hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].itemID != ItemID.TILE_AIR) {
                     onGround = true;
                     broken = true;
                     break;
@@ -217,11 +247,14 @@ public abstract class MovingObject {
         }
         hitbox.y--;
     }
+
+
     void applyJumpForce(){
         if(up && onGround){
             ySpeed = -jumpForce; //Jump if the player is on the ground and the jump key is pressed.
         }
     }
+
 
     void confirmPosition(){
         y += ySpeed;
@@ -230,6 +263,7 @@ public abstract class MovingObject {
         hitbox.setLocation((int) Math.round(x), (int) Math.round(y));
         textureLabel.setLocation(((int) Math.round(x))+textureXOffset, ((int) Math.round(y))+textureYOffset);
     }
+
 
     public void calculateNewPosition(){
         setTargetSpeed();
@@ -241,9 +275,11 @@ public abstract class MovingObject {
         confirmPosition();
     }
 
+
     void onUpdate(){
         calculateNewPosition();
     }
+
 
     void deconstruct(boolean confirm){
         if(confirm){
@@ -252,6 +288,7 @@ public abstract class MovingObject {
             Game.movingObjects.remove(this);
         }
     }
+
 
     @Override
     public String toString(){

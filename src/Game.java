@@ -1,27 +1,28 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 import java.util.Timer;
-import java.util.TimerTask;
 
 public class Game{
     public static final long MILLISECONDS_PER_UPDATE = 16;
-    public static final Random WORLD_RANDOM = new Random();
+    public static final Random WORLD_RANDOM = new Random(2);
     public static JFrame frame = new JFrame();
     public static JLayeredPane layeredPane = new JLayeredPane();
     public Timer mainGameLoop;
     public static Tiles.Tile[][] tiles;
     public static Tiles.TileGraphics[] chunks;
-    public static BufferedImage[] chunkTextures;
+    public static Tiles.Tile[][] backgroundTiles;
     protected static Dimension screenSize;
     public static ArrayList<MovingObject> movingObjects = new ArrayList<>();
     private final int spawnChunksLength;
-    private final int randomSelectionsPerChunkPerUpdate = 3;
+    private final int randomSelectionsPerChunkPerUpdate = 1;
+    public long updateNum = 0;
+
 
     public Game(){
         tiles = new Tiles.Tile[256][256];
+        backgroundTiles = new Tiles.Tile[tiles.length][tiles[0].length];
 
         frame.setTitle("Voxel Game But Better-ish");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -39,7 +40,26 @@ public class Game{
 
         frame.setVisible(true);
 
-        Tiles.WorldGeneration.OverworldGeneration owg = new Tiles.WorldGeneration.OverworldGeneration();
+        Tiles.WorldGeneration.OverworldGeneration owg = new Tiles.WorldGeneration.OverworldGeneration(){
+            @Override
+            public Tiles.Tile[][] generate(Tiles.Tile[][] tiles, String levelName) {
+                System.out.println();
+                System.out.println("Beginning " + levelName + " map generation...");
+                long startTime = System.nanoTime();
+                tiles = generateOres(generateBase(tiles));
+                for (int i = 0; i < tiles.length; i++) {
+                    backgroundTiles[i] = Arrays.copyOf(tiles[i], tiles[i].length);
+                }
+                System.out.println("Before:");
+                tiles = generateDetails(generatePortals(generateWorldFloor(generateCavities(tiles))));
+                System.out.println();
+                System.out.println("After:");
+                System.out.println();
+                System.out.println("Map generation complete");
+                System.out.println("Completed in " + (int) ((System.nanoTime() - startTime)*0.000001) + " Milliseconds");
+                return tiles;
+            }
+        };
         tiles = owg.generate(tiles, "Overworld");
 
         System.out.println();
@@ -49,6 +69,7 @@ public class Game{
             System.out.printf("%07.3f%% (%0" + String.valueOf(tiles.length * tiles[0].length).length() + "d/%0" + String.valueOf(tiles.length * tiles[0].length).length() + "d)\n", ((double) (x*100)/ tiles.length), x * tiles[0].length, tiles.length * tiles[0].length); //Don't move to y loop, will double time to generate textures due to printing
             for (int y = 0; y < tiles[x].length; y++) {
                 tiles[x][y].generateTileTextures();
+                backgroundTiles[x][y].generateTileTextures();
             }
         }
         System.out.println("100.000% (" + tiles.length * tiles[0].length + "/" + tiles.length * tiles[0].length + ")");
@@ -57,33 +78,28 @@ public class Game{
 
         spawnChunksLength = 0;
         chunks = new Tiles.TileGraphics[tiles.length];
-        chunkTextures = new BufferedImage[tiles.length];
 
         int playerSpawnX = 0;
         for (int y = 0; y < tiles[playerSpawnX].length; y++) {
-            if(!tiles[playerSpawnX][y].isBroken && tiles[playerSpawnX][y].itemID != ItemID.TILE_AIR){
+            if(tiles[playerSpawnX][y].itemID != ItemID.TILE_AIR && tiles[playerSpawnX][y].itemID != ItemID.TILE_AIR){
                 movingObjects.add(new Player(playerSpawnX * Tiles.TILE_WIDTH, (y * Tiles.TILE_HEIGHT)-Player.PLAYER_HEIGHT));
                 break;
             }
         }
 
         Thread generateOtherTextures = new Thread(() -> {
-            try {
-                Thread.sleep(1); //Done exclusively to print the console in the correct order >:)
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
             System.out.println();
             System.out.println("Beginning chunk texture stitching...");
             long startTime1 = System.nanoTime();
-            for (int i = spawnChunksLength; i < chunkTextures.length; i++) {
-                System.out.printf("%07.3f%% (%0" + String.valueOf(chunkTextures.length).length() + "d/%0" + String.valueOf(chunkTextures.length).length() + "d)\n", ((double) ((i - spawnChunksLength)*100)/(chunkTextures.length - spawnChunksLength)), i, chunkTextures.length);
+            for (int i = spawnChunksLength; i < chunks.length; i++) {
+                System.out.printf("%07.3f%% (%0" + String.valueOf(chunks.length).length() + "d/%0" + String.valueOf(chunks.length).length() + "d)\n", ((double) ((i - spawnChunksLength)*100)/(chunks.length - spawnChunksLength)), i, chunks.length);
                 chunks[i] = new Tiles.TileGraphics();
+                chunks[i].stitchBackgroundTexture(backgroundTiles[i]);
+                chunks[i].stitchTexture(tiles[i]);
                 chunks[i].textureLabel.setLocation(i* Tiles.TILE_WIDTH, 0);
-                chunkTextures[i] = ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(chunks[i].stitchChunk(i)), 4);
-                chunks[i].redrawChunk(chunkTextures[i]);
+                chunks[i].redrawChunk(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(chunks[i].texture), 4));
             }
-            System.out.println("100.000% (" + chunkTextures.length + "/" + chunkTextures.length + ")");
+            System.out.println("100.000% (" + chunks.length + "/" + chunks.length + ")");
             System.out.println("Chunk texture stitching complete");
             System.out.println("Completed in " + (int) ((System.nanoTime() - startTime1)*0.000001) + " Milliseconds");
         });
@@ -94,9 +110,20 @@ public class Game{
             @Override
             public void run() {
                 /*------------------------------------BEGIN MAIN LOOP------------------------------------*/
+                updateNum++;
                 for (int i = 0; i < movingObjects.size(); i++) {
                     movingObjects.get(i).onUpdate();
                 }
+
+                for (int x = 0; x < chunks.length; x++) {
+                    if(chunks[x] != null && chunks[x].yValues.size()>0){
+                        chunks[x].modifyChunk(x, chunks[x].yValues);
+                        for (int i = 0; i < chunks[x].yValues.size(); i++) {
+                            chunks[x].yValues.remove(i);
+                        }
+                    }
+                }
+
                 for (int x = 0; x < tiles.length; x++) {
                     for (int i = 0; i < randomSelectionsPerChunkPerUpdate; i++) {
                         int y = (int) Math.floor(Math.random() * tiles[x].length);
@@ -107,6 +134,7 @@ public class Game{
             }
         }, 0, MILLISECONDS_PER_UPDATE);
     }
+
 
     public static void moveCamera(double x, double y, int width, int height){
         int paneNewX = ((int) -Math.round(x)) + ((frame.getWidth() - width)/2);
