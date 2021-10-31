@@ -1,5 +1,3 @@
-import javax.swing.*;
-import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -28,13 +26,11 @@ public class Player extends MovingObject implements KeyListener {
     Tiles.Tile[] inventory = new Tiles.Tile[20];
     int[] inventoryQuantity = new int[20];
 
-
     @Override
     public void onUpdate() {
         this.calculateNewPosition();
         Game.moveCamera(x, y, width, height);
     }
-
 
     //TODO: Fix dead stop on landing bug.
     //To recreate: jump twice without releasing jump button, will stop dead upon landing.

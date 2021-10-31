@@ -4,6 +4,7 @@ import java.util.ArrayList;
 public abstract class NonMovingObject {
     BufferedImage texture;
     ItemID itemID;
+    boolean hasTransparency = false;
 
 
     public BufferedImage generateTexture(ItemID itemID){
@@ -52,6 +53,7 @@ public abstract class NonMovingObject {
                 return ImageProcessing.overlayImage(baseDirtTexture, baseGrassTexture);
 
             }
+            //TODO: Replace stone textures with a less noisy, smoother variant
             case TILE_STONE -> {
                 final ArrayList<String> textureRandom = new ArrayList<>();
                 for (int i = 0; i < 5; i++) {

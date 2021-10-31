@@ -1,5 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public abstract class MovingObject {
     public MovingObject(double x, double y, int z, int width, int height, String textureLocation){
@@ -20,7 +23,7 @@ public abstract class MovingObject {
         postInitialization();
     }
 
-    public abstract void postInitialization();
+
 
     public MovingObject(double x, double y, int z, int width, int height, Image newTexture){
         this.x = x;
@@ -36,11 +39,14 @@ public abstract class MovingObject {
         this.textureLabel.setIcon(new ImageIcon(newTexture));
         Game.layeredPane.add(textureLabel);
         Game.layeredPane.setLayer(textureLabel, MovingObject.MOVING_OBJECT_LAYER);
+
+        postInitialization();
     }
 
     static final int MOVING_OBJECT_LAYER = 3;
 
     //Default values, can be changed in objects extends MovingObject
+    ArrayList<ItemID> nonSolidTiles = new ArrayList<>(List.of(ItemID.TILE_AIR));
 
     int width;
     int height;
@@ -76,8 +82,12 @@ public abstract class MovingObject {
     boolean canSprint = true;
     boolean hasGravity = true;
     boolean onGround;
+
     boolean horizontalTileCollisionDetected;
     boolean verticalTileCollisionDetected;
+
+
+    public abstract void postInitialization();
 
 
     void setTargetSpeed(){
@@ -168,17 +178,17 @@ public abstract class MovingObject {
         horizontalTileCollisionDetected = false;
         if(xSpeed != 0){
             hitbox.x += xSpeed;
-            for (int i = minX; i <= maxX; i++) {
-                for (int j = minY; j <= maxY; j++) {
-                    if(hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].itemID != ItemID.TILE_AIR){
+            for (int x = minX; x <= maxX; x++) {
+                for (int y = minY; y <= maxY; y++) {
+                    if(hitbox.intersects(Game.tiles[x][y].hitbox) && !nonSolidTiles.contains(Game.tiles[x][y].itemID)){
                         hitbox.x -= xSpeed;
                         horizontalTileCollisionDetected = true;
-                        while (!hitbox.intersects(Game.tiles[i][j].hitbox)) {
+                        while (!hitbox.intersects(Game.tiles[x][y].hitbox)) {
                             hitbox.x += Math.signum(xSpeed);
                         }
                         hitbox.x -= Math.signum(xSpeed);
                         xSpeed = 0;
-                        x = hitbox.x;
+                        this.x = hitbox.x;
                     }
                 }
             }
@@ -187,17 +197,17 @@ public abstract class MovingObject {
         verticalTileCollisionDetected = false;
         if(ySpeed != 0){
             hitbox.y += ySpeed;
-            for (int i = minX; i <= maxX; i++) {
-                for (int j = minY; j <= maxY; j++) {
-                    if(hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].itemID != ItemID.TILE_AIR){
+            for (int x = minX; x <= maxX; x++) {
+                for (int y = minY; y <= maxY; y++) {
+                    if(hitbox.intersects(Game.tiles[x][y].hitbox) && !nonSolidTiles.contains(Game.tiles[x][y].itemID)){
                         hitbox.y -= ySpeed;
                         verticalTileCollisionDetected = true;
-                        while (!hitbox.intersects(Game.tiles[i][j].hitbox)) {
+                        while (!hitbox.intersects(Game.tiles[x][y].hitbox)) {
                             hitbox.y += Math.signum(ySpeed);
                         }
                         hitbox.y -= Math.signum(ySpeed);
                         ySpeed = 0;
-                        y = hitbox.y;
+                        this.y = hitbox.y;
                     }
                 }
             }
@@ -206,7 +216,7 @@ public abstract class MovingObject {
 
 
     void checkOnGround(){
-        final int COLLISION_RANGE = 2;
+        final int COLLISION_RANGE = 1;
 
         int minX = (int) Math.round(((double) hitbox.x / Tiles.TILE_WIDTH) - COLLISION_RANGE);
         int maxX = (int) Math.round(((double) hitbox.x / Tiles.TILE_WIDTH) + COLLISION_RANGE);
@@ -230,10 +240,10 @@ public abstract class MovingObject {
         }
 
         hitbox.y++;
-        for (int i = minX; i <= maxX; i++) {
+        for (int x = minX; x <= maxX; x++) {
             boolean broken = false;
-            for (int j = minY; j <= maxY; j++) {
-                if (hitbox.intersects(Game.tiles[i][j].hitbox) && Game.tiles[i][j].itemID != ItemID.TILE_AIR) {
+            for (int y = minY; y <= maxY; y++) {
+                if (hitbox.intersects(Game.tiles[x][y].hitbox) && !nonSolidTiles.contains(Game.tiles[x][y].itemID)) {
                     onGround = true;
                     broken = true;
                     break;

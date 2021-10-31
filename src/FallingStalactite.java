@@ -24,4 +24,12 @@ public class FallingStalactite extends MovingObject{
         calculateNewPosition();
         deconstruct(verticalTileCollisionDetected);
     }
+
+    @Override
+    public void calculateNewPosition(){
+        applySpeedDeadzone();
+        applyGravity();
+        collisionDetection();
+        confirmPosition();
+    }
 }

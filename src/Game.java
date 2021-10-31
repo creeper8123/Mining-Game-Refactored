@@ -1,12 +1,16 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Timer;
+import java.util.*;
 
 public class Game{
     public static final long MILLISECONDS_PER_UPDATE = 16;
-    public static final Random WORLD_RANDOM = new Random(2);
+    public static final long WORLD_RANDOM_SEED = new Random().nextLong();
+    public static final Random WORLD_RANDOM = new Random(WORLD_RANDOM_SEED);
     public static JFrame frame = new JFrame();
     public static JLayeredPane layeredPane = new JLayeredPane();
     public Timer mainGameLoop;
@@ -18,6 +22,8 @@ public class Game{
     private final int spawnChunksLength;
     private final int randomSelectionsPerChunkPerUpdate = 1;
     public long updateNum = 0;
+
+    public final boolean saveMapAsPhoto = false;
 
 
     public Game(){
@@ -50,10 +56,8 @@ public class Game{
                 for (int i = 0; i < tiles.length; i++) {
                     backgroundTiles[i] = Arrays.copyOf(tiles[i], tiles[i].length);
                 }
-                System.out.println("Before:");
                 tiles = generateDetails(generatePortals(generateWorldFloor(generateCavities(tiles))));
                 System.out.println();
-                System.out.println("After:");
                 System.out.println();
                 System.out.println("Map generation complete");
                 System.out.println("Completed in " + (int) ((System.nanoTime() - startTime)*0.000001) + " Milliseconds");
@@ -87,7 +91,7 @@ public class Game{
             }
         }
 
-        Thread generateOtherTextures = new Thread(() -> {
+        Thread gameBackgroundGeneration = new Thread(() -> {
             System.out.println();
             System.out.println("Beginning chunk texture stitching...");
             long startTime1 = System.nanoTime();
@@ -102,17 +106,25 @@ public class Game{
             System.out.println("100.000% (" + chunks.length + "/" + chunks.length + ")");
             System.out.println("Chunk texture stitching complete");
             System.out.println("Completed in " + (int) ((System.nanoTime() - startTime1)*0.000001) + " Milliseconds");
+            if(saveMapAsPhoto){
+                System.out.println();
+                System.out.println("Saving textures as photo...");
+                saveChunkTexturesAsImage(chunks);
+            }
         });
-        generateOtherTextures.start();
+        gameBackgroundGeneration.start();
 
         mainGameLoop = new Timer();
         mainGameLoop.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 /*------------------------------------BEGIN MAIN LOOP------------------------------------*/
-                updateNum++;
                 for (int i = 0; i < movingObjects.size(); i++) {
-                    movingObjects.get(i).onUpdate();
+                    int oldSize = movingObjects.size();
+                    movingObjects.get(i).onUpdate(); //Do not replace with enhanced loop, deconstruction will cause Concurrent Modification Exceptions
+                    if(movingObjects.size() == oldSize-1){
+                        i--;
+                    }
                 }
 
                 for (int x = 0; x < chunks.length; x++) {
@@ -130,6 +142,8 @@ public class Game{
                         tiles[x][y].onRandomUpdate(tiles, x, y);
                     }
                 }
+
+                updateNum++;
                 /*-------------------------------------END MAIN LOOP-------------------------------------*/
             }
         }, 0, MILLISECONDS_PER_UPDATE);
@@ -153,5 +167,24 @@ public class Game{
         }
 
         layeredPane.setLocation(paneNewX, paneNewY);
+    }
+
+    private static void saveChunkTexturesAsImage(Tiles.TileGraphics[] chunks){
+        BufferedImage worldTexture = new BufferedImage(Tiles.TILE_BASE_WIDTH * tiles.length, Tiles.TILE_BASE_HEIGHT * tiles[0].length, 6);
+        for (int i = 0; i < chunks.length; i++) {
+            BufferedImage workingImage = chunks[i].texture;
+            for (int x = 0; x < workingImage.getWidth(); x++) {
+                for (int y = 0; y < workingImage.getHeight(); y++) {
+                    worldTexture.setRGB(x + (i * workingImage.getWidth()), y, workingImage.getRGB(x, y));
+                }
+            }
+        }
+        try{
+            ImageIO.write(worldTexture, "png", new File("output\\World Maps\\" + WORLD_RANDOM_SEED + ".png"));
+            System.out.println("File saved!");
+            System.out.println("File Saved to " + "output\\World Maps\\" + WORLD_RANDOM_SEED + ".png");
+        }catch(IOException e){
+            e.printStackTrace();
+        }
     }
 }

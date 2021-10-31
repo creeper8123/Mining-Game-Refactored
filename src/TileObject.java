@@ -9,42 +9,7 @@ public abstract class TileObject extends NonMovingObject {
 
     public void whenBroken(Tiles.Tile[][] tiles, int x, int y){
         if(tiles[x][y].itemID != ItemID.TILE_AIR){
-            tiles[x][y] = new Tiles.Tile(x * Tiles.TILE_WIDTH, y * Tiles.TILE_HEIGHT, Tiles.TILE_WIDTH, Tiles.TILE_HEIGHT, ItemID.TILE_AIR){
-
-
-                @Override
-                public void whenClicked(Tiles.Tile[][] tiles, int x, int y) {
-                    //Do nothing
-                }
-
-
-
-                @Override
-                public void whenPlaced(Tiles.Tile[][] tiles, int x, int y) {
-                    super.whenPlaced(tiles, x, y);
-                }
-
-
-
-                @Override
-                public void whenBroken(Tiles.Tile[][] tiles, int x, int y) {
-                    super.whenBroken(tiles, x, y);
-                }
-
-
-
-                @Override
-                public void onTileUpdate(Tiles.Tile[][] tiles, int x, int y) {
-                    //Do nothing
-                }
-
-
-
-                @Override
-                public void onRandomUpdate(Tiles.Tile[][] tiles, int x, int y) {
-                    //Do nothing
-                }
-            };
+            tiles[x][y] = Tiles.TilePresets.getTilePreset(x * Tiles.TILE_WIDTH, y * Tiles.TILE_HEIGHT, Tiles.TILE_WIDTH, Tiles.TILE_HEIGHT, ItemID.TILE_AIR);
             triggerUpdate(tiles, x, y);
             Game.chunks[x].yValues.add(y);
         }
