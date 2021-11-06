@@ -1,10 +1,22 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Describes how objects move in the world, and how they interact with their environment.
+ */
 public abstract class MovingObject {
+
+    /**
+     * Defines the shape, size, location, and looks of a new object, then adds it to the game&#46; Its texture is pulled from resources folder.
+     * @param x The x position the object will spawn at (from the upper right corner).
+     * @param y The y position the object will spawn at (from the upper right corner).
+     * @param z The level the object will spawn in.
+     * @param width The width of the object (from the upper right corner).
+     * @param height The height of the object (from the upper right corner).
+     * @param textureLocation The String filepath of the texture to load.
+     */
     public MovingObject(double x, double y, int z, int width, int height, String textureLocation){
         this.x = x;
         this.y = y;
@@ -17,14 +29,22 @@ public abstract class MovingObject {
         this.textureLabel = new JLabel();
         this.textureLabel.setBounds(hitbox);
         this.textureLabel.setIcon(new ImageIcon(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources(textureLocation)), 4)));
-        Game.layeredPane.add(textureLabel);
-        Game.layeredPane.setLayer(textureLabel, MovingObject.MOVING_OBJECT_LAYER);
 
         postInitialization();
+
+        Game.layeredPane.add(textureLabel);
+        Game.layeredPane.setLayer(textureLabel, MovingObject.MOVING_OBJECT_LAYER);
     }
 
-
-
+    /**
+     * Defines the shape, size, location, and looks of a new object, then adds it to the game&#46; Its texture is predefined.
+     * @param x The x position the object will spawn at (from the upper right corner).
+     * @param y The y position the object will spawn at (from the upper right corner).
+     * @param z The level the object will spawn in.
+     * @param width The width of the object (from the upper right corner).
+     * @param height The height of the object (from the upper right corner).
+     * @param newTexture The Image that the object will be set to with no further processing.
+     */
     public MovingObject(double x, double y, int z, int width, int height, Image newTexture){
         this.x = x;
         this.y = y;
@@ -35,61 +55,67 @@ public abstract class MovingObject {
         this.hitbox = new Rectangle((int) Math.round(x), (int) Math.round(y), width, height);
 
         this.textureLabel = new JLabel();
-        this.textureLabel.setBounds(hitbox);
+        this.textureLabel.setBounds(hitbox.x + textureXOffset, hitbox.y + textureYOffset, hitbox.width, hitbox.height);
         this.textureLabel.setIcon(new ImageIcon(newTexture));
-        Game.layeredPane.add(textureLabel);
-        Game.layeredPane.setLayer(textureLabel, MovingObject.MOVING_OBJECT_LAYER);
 
         postInitialization();
+
+        Game.layeredPane.add(textureLabel);
+        Game.layeredPane.setLayer(textureLabel, MovingObject.MOVING_OBJECT_LAYER);
     }
 
-    static final int MOVING_OBJECT_LAYER = 3;
+    /**The layer of the JLayeredPane that moving objects will be assigned to.*/static final int MOVING_OBJECT_LAYER = 3;
 
     //Default values, can be changed in objects extends MovingObject
-    ArrayList<ItemID> nonSolidTiles = new ArrayList<>(List.of(ItemID.TILE_AIR));
+    /**The ArrayList of ItemIDs that the moving object will not check for collisions on.*/ArrayList<ItemID> nonSolidTiles = new ArrayList<>(List.of(ItemID.TILE_AIR));
 
-    int width;
-    int height;
+    /**The width of the object (from the upper left corner).*/int width;
+    /**The height of the object (from the upper left corner).*/int height;
 
-    double x;
-    double y;
-    int z;
+    /**The x-position of the object (from the upper left corner).*/double x;
+    /**The y-position of the object (from the upper left corner).*/double y;
+    /**The current level of the object (from the upper left corner).*/int z;
 
-    Rectangle hitbox;
-    JLabel textureLabel;
-    int textureXOffset;
-    int textureYOffset;
+    /**The Rectangle object used for collision detection.*/Rectangle hitbox;
+    /**The JLabel object that is used for rendering.*/JLabel textureLabel;
+    /**The number of pixels to shift the texture right (can be negative to shift left).*/int textureXOffset;
+    /**The number of pixels to shift the texture down (can be negative to shift up).*/int textureYOffset;
 
-    boolean left;
-    boolean right;
-    boolean up;
-    boolean down;
-    boolean sprinting;
+    /**The flag for if the object is trying to move left.*/boolean left;
+    /**The flag for if the object is trying to move right.*/boolean right;
+    /**The flag for if the object is trying to move up.*/boolean up;
+    /**The flag for if the object is trying to move down.*/boolean down;
+    /**The flag for if the object is trying to sprint.*/boolean sprinting;
 
-    double xSpeed = 0.0;
-    double ySpeed = 0.0;
-    double xSpeedTarget = 0.0;
-    double ySpeedTarget = 0.0;
-    double xSpeedAcceleration = 0.01 * Game.MILLISECONDS_PER_UPDATE;
-    double xSpeedLimit = 0.3125 * Game.MILLISECONDS_PER_UPDATE;
-    double sprintSpeedMultiplier = 1.33;
-    double jumpForce = 10;
-    double terminalVelocity = 1.5625 * Game.MILLISECONDS_PER_UPDATE;
-    double airborneManeuverabilityMultiplier = 0.25;
-    double speedDeadZone = 0.00625 * Game.MILLISECONDS_PER_UPDATE;
-    double gravity = 0.025 * Game.MILLISECONDS_PER_UPDATE;
+    /**The current horizontal speed of the object.*/double xSpeed = 0.0;
+    /**The current vertical speed of the object.*/double ySpeed = 0.0;
+    /**The current horizontal speed the object is trying to reach.*/double xSpeedTarget = 0.0;
+    /**The current vertical speed the object is trying to reach.*/double ySpeedTarget = 0.0;
+    /**The amount that the xSpeed will change per update when moving to a different speed.*/double xSpeedAcceleration = 0.01 * Game.MILLISECONDS_PER_UPDATE;
+    /**The maximum xSpeed of the object under normal circumstances.*/double xSpeedLimit = 0.3125 * Game.MILLISECONDS_PER_UPDATE;
+    /**The multiplier of xSpeedLimit when the object is trying to sprint.*/double sprintSpeedMultiplier = 1.33;
+    /**The value that the ySpeed will be set to if the object is touching the ground and the up flag is set.*/double jumpForce = 10;
+    /**The highest value that ySpeed can be under normal circumstances.*/double terminalVelocity = 1.5625 * Game.MILLISECONDS_PER_UPDATE;
+    /**The multiplier of xSpeedAcceleration when the object is in the air.*/double airborneManeuverabilityMultiplier = 0.25;
+    /**The value that, if the difference between the current speed and the target speed is less than, the current speed will be set to the target speed.*/double speedDeadZone = 0.00625 * Game.MILLISECONDS_PER_UPDATE;
+    /**The value that's added to the ySpeed every update if the object is not on the ground.*/double gravity = 0.025 * Game.MILLISECONDS_PER_UPDATE;
 
-    boolean canSprint = true;
-    boolean hasGravity = true;
-    boolean onGround;
+    /**The flag for if the object has the ability to sprint.*/boolean canSprint = true;
+    /**The flag for if the object is affected by gravity*/boolean hasGravity = true; //TODO: make objects with no gravity float towards ySpeed 0, using the gravity value as a dampener rate.
+    /**The flag for if the object has a tile 1 pixel beneath it, and it's ySpeed is 0*/boolean onGround;
 
-    boolean horizontalTileCollisionDetected;
-    boolean verticalTileCollisionDetected;
+    /**The flag for if the object collided with the side of a tile (xSpeed must have not been 0).*/boolean horizontalTileCollisionDetected;
+    /**The flag for if the object collided with the top or the bottom of a tile (ySpeed must have not been 0).*/boolean verticalTileCollisionDetected;
+    /***/InventoryManager inventory;
 
-
+    /**
+     * Commits any changes that need to be made to the individual object before it's displayed on the screen.
+     */
     public abstract void postInitialization();
 
-
+    /**
+     * Sets the target speeds of the object depending on what direction it's currently trying to move in.
+     */
     void setTargetSpeed(){
         if(left ^ right){
             if(left){
@@ -114,7 +140,9 @@ public abstract class MovingObject {
         }
     }
 
-
+    /**
+     * Sets the speed to its target value if the difference between the target speed and the actual speed is less than speedDeadZone.
+     */
     void applySpeedDeadzone(){
          if((Math.abs(xSpeed - xSpeedTarget) < speedDeadZone)){
              xSpeed = xSpeedTarget;
@@ -133,7 +161,9 @@ public abstract class MovingObject {
          }
      }
 
-
+    /**
+     * Increases the downward speed if the object is not on the ground, and it's moving slower than its terminal velocity.
+     */
     void applyGravity(){
         if(!onGround && hasGravity){
             if(ySpeed < terminalVelocity){
@@ -150,6 +180,9 @@ public abstract class MovingObject {
     //Related: Some jumps are higher than others. Easiest to replicate on all flat terrain (IE bottom of the world)
     //Dead stop only happens on the higher jumps
     //TODO: Fix twitching when pushing to the right bug.
+    /**
+     * Checks if the object is intersecting with any tiles not on the nonSolidTiles ArrayList&#46; If an intersection is detected, the object is pushed away from the tile and the appropriate flag is set for 1 tick.
+     */
     void collisionDetection(){
 
         final int COLLISION_RANGE = 2;
@@ -214,7 +247,9 @@ public abstract class MovingObject {
         }
     }
 
-
+    /**
+     * Checks if the object is touching the ground, and sets the onGround flag appropriately.
+     */
     void checkOnGround(){
         final int COLLISION_RANGE = 1;
 
@@ -258,14 +293,18 @@ public abstract class MovingObject {
         hitbox.y--;
     }
 
-
+    /**
+     * If the object is on the ground and is wanting to jump, then its vertical speed is set to -jumpForce.
+     */
     void applyJumpForce(){
         if(up && onGround){
             ySpeed = -jumpForce; //Jump if the player is on the ground and the jump key is pressed.
         }
     }
 
-
+    /**
+     * Adds the current x and y speeds to the position, and sets both the hitbox and texture to the newly updated position.
+     */
     void confirmPosition(){
         y += ySpeed;
         x += xSpeed;
@@ -274,7 +313,9 @@ public abstract class MovingObject {
         textureLabel.setLocation(((int) Math.round(x))+textureXOffset, ((int) Math.round(y))+textureYOffset);
     }
 
-
+    /**
+     * Calls various methods to generate and confirm a new position for the object.
+     */
     public void calculateNewPosition(){
         setTargetSpeed();
         applySpeedDeadzone();
@@ -285,12 +326,17 @@ public abstract class MovingObject {
         confirmPosition();
     }
 
-
+    /**
+     * This method is called every tick for the object.
+     */
     void onUpdate(){
         calculateNewPosition();
     }
 
-
+    /**
+     * Removes the object from the screen and from the list of objects to update each tick.
+     * @param confirm If true, the object will follow through with deconstruction&#46; If false, the deconstruction is aborted.
+     */
     void deconstruct(boolean confirm){
         if(confirm){
             Game.layeredPane.remove(textureLabel);
@@ -299,7 +345,10 @@ public abstract class MovingObject {
         }
     }
 
-
+    /**
+     * Generates a large String of useful information about the object's current situation.
+     * @return Returns a String containing its x and y positions, its x and y speeds, and its x and y target speeds.
+     */
     @Override
     public String toString(){
         String entityData = "Entity Info: {";

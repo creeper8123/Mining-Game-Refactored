@@ -2,9 +2,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class Player extends MovingObject implements KeyListener {
-    public static final int PLAYER_WIDTH = 32;
-    public static final int PLAYER_HEIGHT = 48;
-    public static final double PLAYER_REACH = 256;
+    /***/public static final int PLAYER_WIDTH = 32;
+    /***/public static final int PLAYER_HEIGHT = 48;
+    /***/public static final double PLAYER_REACH = 256;
 
 
     public Player(double initialX, double initialY){
@@ -15,16 +15,14 @@ public class Player extends MovingObject implements KeyListener {
     @Override
     public void postInitialization(){
         Game.frame.addKeyListener(this);
+        this.inventory = new InventoryManager(10);
     }
 
-    boolean upPressed;
-    boolean downPressed;
-    boolean leftPressed;
-    boolean rightPressed;
-    boolean sprintPressed;
-
-    Tiles.Tile[] inventory = new Tiles.Tile[20];
-    int[] inventoryQuantity = new int[20];
+    /***/boolean upPressed;
+    /***/boolean downPressed;
+    /***/boolean leftPressed;
+    /***/boolean rightPressed;
+    /***/boolean sprintPressed;
 
     @Override
     public void onUpdate() {

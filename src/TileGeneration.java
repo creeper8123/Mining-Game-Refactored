@@ -1,5 +1,5 @@
 public interface TileGeneration {
-
+    //TODO: Consider making methods void, passing the parameter in this way will send the references instead of copying the array.
 
     Tiles.Tile[][] generateBase(Tiles.Tile[][] tiles);
 

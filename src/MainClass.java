@@ -1,4 +1,11 @@
+/**
+ * The class used to run the game.
+ */
 public class MainClass {
+    /**
+     * Main method.
+     * @param args Input is ignored.
+     */
     public static void main(String[] args) {
         System.out.println("Starting Game...");
         long startTime = System.nanoTime();

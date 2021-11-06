@@ -32,7 +32,7 @@ public class PerlinNoise{
         }
 
 
-        //Connect a curved line  flattening at the points, and get the value at that location
+        //Connect a curved line flattening at the points, and get the value at that location
         public double cosInterpolation(double x){
             while(x+1 > values.size()){
                 values.add(random.nextDouble());

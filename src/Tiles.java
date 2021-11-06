@@ -6,17 +6,17 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 public class Tiles {
-    public static final int TILE_WIDTH = 64;
-    public static final int TILE_HEIGHT = 64;
-    public static final int TILE_BASE_WIDTH = 16;
-    public static final int TILE_BASE_HEIGHT = 16;
+    /***/public static final int TILE_WIDTH = 64;
+    /***/public static final int TILE_HEIGHT = 64;
+    /***/public static final int TILE_BASE_WIDTH = 16;
+    /***/public static final int TILE_BASE_HEIGHT = 16;
 
     static class TileGraphics implements MouseListener {
-        public static final int TILE_LAYER = 2;
+        /***/public static final int TILE_LAYER = 2;
 
-        public JLabel textureLabel;
-        public BufferedImage texture;
-        public BufferedImage backgroundTexture = new BufferedImage(TILE_BASE_WIDTH, TILE_BASE_HEIGHT * Game.tiles[0].length, 6);
+        /***/public JLabel textureLabel;
+        /***/public BufferedImage texture;
+        /***/public BufferedImage backgroundTexture = new BufferedImage(TILE_BASE_WIDTH, TILE_BASE_HEIGHT * Game.tiles[0].length, 6);
 
         public ArrayList<Integer> yValues = new ArrayList<>();
 
@@ -49,7 +49,7 @@ public class Tiles {
                             r = pixelColour.getRed();
                             g = pixelColour.getGreen();
                             b = pixelColour.getBlue();
-                            if(a != ImageProcessing.NULL_COLOR_REPLACEMENT.getAlpha() || r != ImageProcessing.NULL_COLOR_REPLACEMENT.getRed() || g != ImageProcessing.NULL_COLOR_REPLACEMENT.getGreen() || b != ImageProcessing.NULL_COLOR_REPLACEMENT.getBlue()){
+                            if(a != ImageProcessing.SKY_COLOR.getAlpha() || r != ImageProcessing.SKY_COLOR.getRed() || g != ImageProcessing.SKY_COLOR.getGreen() || b != ImageProcessing.SKY_COLOR.getBlue()){
                                 r /=2;
                                 g /=2;
                                 b /=2;
@@ -101,7 +101,7 @@ public class Tiles {
                     workingImage = new BufferedImage(TILE_BASE_WIDTH, TILE_BASE_HEIGHT, 6);
                     for (int x = 0; x < TILE_BASE_WIDTH; x++) {
                         for (int y = 0; y < TILE_BASE_HEIGHT; y++) {
-                            Color pixelColour = ImageProcessing.NULL_COLOR_REPLACEMENT;
+                            Color pixelColour = ImageProcessing.SKY_COLOR;
                             a = pixelColour.getAlpha();
                             r = pixelColour.getRed();
                             g = pixelColour.getGreen();
@@ -191,7 +191,7 @@ public class Tiles {
             int playerMiddleY = (int) Game.movingObjects.get(0).y + (Player.PLAYER_HEIGHT/2);
             if(Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)) < Player.PLAYER_REACH){
                 if(Game.tiles[x][y].canBeBroken){
-                    Game.tiles[x][y].whenBroken(Game.tiles, x, y);
+                    Game.tiles[x][y].whenBroken(Game.tiles, x, y, Game.movingObjects.get(0));
                 }
             }
         }
@@ -217,17 +217,17 @@ public class Tiles {
         }
     }
 
-    static class Tile extends TileObject{
+    static class Tile extends HoldableObject{
 
-        public Rectangle hitbox;
-        //protected boolean hasTransparency = false;
-        public boolean canBeBroken;
+        /***/public Rectangle hitbox;
+        /***/public boolean canBeBroken;
+        /***/public ItemID dropItemID;
 
-        public Tile(int x, int y, int width, int height, ItemID tileID){
-            this.itemID = tileID;
+        public Tile(int x, int y, int width, int height, ItemID itemID){
+            super(itemID);
             hitbox = new Rectangle(x, y, width, height);
-            canBeBroken = tileID != ItemID.TILE_AIR;
-            hasTransparency = tileID == ItemID.TILE_STALACTITE || tileID == ItemID.TILE_STALAGMITE;
+            canBeBroken = itemID != ItemID.TILE_AIR;
+            hasTransparency = itemID == ItemID.TILE_STALACTITE || itemID == ItemID.TILE_STALAGMITE;
         }
 
 
@@ -235,25 +235,387 @@ public class Tiles {
             texture = generateTexture(itemID);
         }
 
-        @Override
-        public void whenClicked(Tiles.Tile[][] tiles, int x, int y) {
-            System.out.println("Nothing specified for \"whenClicked\" for tile " + tiles[x][y].itemID + " at position [" + x + "][" + y +"]");
+        public void whenUsed(Tiles.Tile[][] tiles, int x, int y){
+            System.out.println("WARNING! Nothing Specified for " + this.itemID + " whenClicked at x" + x + ", y" + y);
         }
 
-        @Override
-        public void onTileUpdate(Tiles.Tile[][] tiles, int x, int y) {
-            System.out.println("Nothing specified for \"onTileUpdate\" for tile " + tiles[x][y].itemID + " at position [" + x + "][" + y +"]");
+
+        public void whenPlaced(Tiles.Tile[][] tiles, int x, int y){
+            triggerUpdate(tiles, x, y);
         }
 
-        @Override
-        public void onRandomUpdate(Tiles.Tile[][] tiles, int x, int y) {
-            System.out.println("Nothing specified for \"onRandomUpdate\" for tile " + tiles[x][y].itemID + " at position [" + x + "][" + y +"]");
+
+        public void whenBroken(Tiles.Tile[][] tiles, int x, int y, MovingObject brokenByEntity){
+            if(brokenByEntity != null){
+                brokenByEntity.inventory.addToInventory(new HoldableObject(this.dropItemID), 1);
+                System.out.println(brokenByEntity.inventory);
+            }
+            if(tiles[x][y].itemID != ItemID.TILE_AIR){
+                tiles[x][y] = TilePresets.getTilePreset(x * Tiles.TILE_WIDTH, y * Tiles.TILE_HEIGHT, Tiles.TILE_WIDTH, Tiles.TILE_HEIGHT, ItemID.TILE_AIR);
+                triggerUpdate(tiles, x, y);
+                Game.chunks[x].yValues.add(y);
+            }
+        }
+
+
+        public void onTileUpdate(Tiles.Tile[][] tiles, int x, int y){
+            System.out.println("WARNING! Nothing Specified for " + this.itemID + " onTileUpdate at x" + x + ", y" + y);
+        }
+
+
+        public void onRandomUpdate(Tiles.Tile[][] tiles, int x, int y){
+            System.out.println("WARNING! Nothing Specified for " + this.itemID + " onRandomUpdate at x" + x + ", y" + y);
+        }
+
+        private void triggerUpdate(Tiles.Tile[][] tiles, int x, int y){
+            if(x>0){
+                tiles[x-1][y].onTileUpdate(tiles, x-1, y);
+            }
+            if(x<tiles.length-1){
+                tiles[x+1][y].onTileUpdate(tiles, x+1, y);
+            }
+            if(y>0){
+                tiles[x][y-1].onTileUpdate(tiles, x, y-1);
+            }
+            if(y<tiles[0].length-1){
+                tiles[x][y+1].onTileUpdate(tiles, x, y+1);
+            }
+        }
+
+        /**
+         *
+         */
+        protected static class TilePresets{
+            public static Tile getTilePreset(int x, int y, int width, int height, ItemID tileID){
+                Tile finalTile;
+                if(tileID == ItemID.TILE_AIR){
+                    finalTile = new Tile(x, y, width, height, ItemID.TILE_AIR){
+                        @Override
+                        public void whenUsed(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void whenPlaced(Tile[][] tiles, int x, int y) {
+                            super.whenPlaced(tiles, x, y);
+                        }
+
+                        @Override
+                        public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                            super.whenBroken(tiles, x, y, brokenByEntity);
+                        }
+
+                        @Override
+                        public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void onRandomUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+                    };
+                    finalTile.dropItemID = null;
+                }else if(tileID == ItemID.TILE_STONE){
+                    finalTile = new Tile(x, y, width, height, ItemID.TILE_STONE){
+                        @Override
+                        public void whenUsed(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void whenPlaced(Tile[][] tiles, int x, int y) {
+                            super.whenPlaced(tiles, x, y);
+                        }
+
+                        @Override
+                        public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                            super.whenBroken(tiles, x, y, brokenByEntity);
+                        }
+
+                        @Override
+                        public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void onRandomUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+                    };
+                    finalTile.dropItemID = ItemID.TILE_STONE;
+                }else if(tileID == ItemID.TILE_DIRT_GRASS) {
+                    finalTile = new Tile(x, y, width, height, ItemID.TILE_DIRT_GRASS){
+                        @Override
+                        public void whenUsed(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void whenPlaced(Tile[][] tiles, int x, int y) {
+                            super.whenPlaced(tiles, x, y);
+                        }
+
+                        @Override
+                        public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                            super.whenBroken(tiles, x, y, brokenByEntity);
+                        }
+
+                        @Override
+                        public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void onRandomUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+                    };
+                    finalTile.dropItemID = ItemID.TILE_DIRT;
+                }else if(tileID == ItemID.TILE_DIRT) {
+                    finalTile = new Tile(x, y, width, height, ItemID.TILE_DIRT){
+                        @Override
+                        public void whenUsed(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void whenPlaced(Tile[][] tiles, int x, int y) {
+                            super.whenPlaced(tiles, x, y);
+                        }
+
+                        @Override
+                        public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                            super.whenBroken(tiles, x, y, brokenByEntity);
+                        }
+
+                        @Override
+                        public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void onRandomUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+                    };
+                    finalTile.dropItemID = ItemID.TILE_DIRT;
+                }else if(tileID == ItemID.TILE_COAL_ORE){
+                    finalTile = new Tile(x, y, width, height, ItemID.TILE_COAL_ORE){
+                        @Override
+                        public void whenUsed(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void whenPlaced(Tile[][] tiles, int x, int y) {
+                            super.whenPlaced(tiles, x, y);
+                        }
+
+                        @Override
+                        public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                            super.whenBroken(tiles, x, y, brokenByEntity);
+                        }
+
+                        @Override
+                        public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void onRandomUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+                    };
+                    finalTile.dropItemID = ItemID.TILE_COAL_ORE;
+                }else if(tileID == ItemID.TILE_IRON_ORE){
+                    finalTile = new Tile(x, y, width, height, ItemID.TILE_IRON_ORE){
+                        @Override
+                        public void whenUsed(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void whenPlaced(Tile[][] tiles, int x, int y) {
+                            super.whenPlaced(tiles, x, y);
+                        }
+
+                        @Override
+                        public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                            super.whenBroken(tiles, x, y, brokenByEntity);
+                        }
+
+                        @Override
+                        public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void onRandomUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+                    };
+                    finalTile.dropItemID = ItemID.TILE_IRON_ORE;
+                }else if(tileID == ItemID.TILE_GOLD_ORE){
+                    finalTile = new Tile(x, y, width, height, ItemID.TILE_GOLD_ORE){
+                        @Override
+                        public void whenUsed(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void whenPlaced(Tile[][] tiles, int x, int y) {
+                            super.whenPlaced(tiles, x, y);
+                        }
+
+                        @Override
+                        public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                            super.whenBroken(tiles, x, y, brokenByEntity);
+                        }
+
+                        @Override
+                        public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void onRandomUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+                    };
+                    finalTile.dropItemID = ItemID.TILE_GOLD_ORE;
+                }else if(tileID == ItemID.TILE_DIAMOND_ORE){
+                    finalTile = new Tile(x, y, width, height, ItemID.TILE_DIAMOND_ORE){
+                        @Override
+                        public void whenUsed(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void whenPlaced(Tile[][] tiles, int x, int y) {
+                            super.whenPlaced(tiles, x, y);
+                        }
+
+                        @Override
+                        public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                            super.whenBroken(tiles, x, y, brokenByEntity);
+                        }
+
+                        @Override
+                        public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void onRandomUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+                    };
+                    finalTile.dropItemID = ItemID.TILE_DIAMOND_ORE;
+                }else if(tileID == ItemID.TILE_STALACTITE){
+                    finalTile = new Tile(x, y, width, height, ItemID.TILE_STALACTITE){
+                        @Override
+                        public void whenUsed(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void whenPlaced(Tile[][] tiles, int x, int y) {
+                            super.whenPlaced(tiles, x, y);
+                        }
+
+                        @Override
+                        public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                            super.whenBroken(tiles, x, y, brokenByEntity);
+                        }
+
+                        @Override
+                        public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                            if(y>0){
+                                if(tiles[x][y-1].itemID == ItemID.TILE_AIR && this.itemID != ItemID.TILE_AIR){
+                                    this.whenBroken(tiles, x, y, null);
+                                    Game.movingObjects.add(new FallingStalactite(x * TILE_WIDTH, y * TILE_HEIGHT, this.hitbox.width, this.hitbox.height, ImageProcessing.resizeImage(ImageProcessing.removeNullPixels(this.texture), 4)));
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onRandomUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+                    };
+                    finalTile.dropItemID = null;
+                    finalTile.hitbox = new Rectangle(x + 20, y, width - 40, height - 16);
+                }else if(tileID == ItemID.TILE_STALAGMITE){
+                    finalTile = new Tile(x, y, width, height, ItemID.TILE_STALAGMITE){
+                        @Override
+                        public void whenUsed(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void whenPlaced(Tile[][] tiles, int x, int y) {
+                            super.whenPlaced(tiles, x, y);
+                        }
+
+                        @Override
+                        public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                            super.whenBroken(tiles, x, y, brokenByEntity);
+                        }
+
+                        @Override
+                        public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                            if(y<tiles[0].length-1){
+                                if(tiles[x][y+1].itemID == ItemID.TILE_AIR){
+                                    this.whenBroken(tiles, x, y, null);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onRandomUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+                    };
+                    finalTile.dropItemID = null;
+                    finalTile.hitbox = new Rectangle(x + 20, y + 16, width - 40, height - 16);
+                }else{
+                    finalTile = new Tile(x, y, width, height, ItemID.TILE_AIR) {
+                        @Override
+                        public void whenUsed(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void whenPlaced(Tile[][] tiles, int x, int y) {
+                            super.whenPlaced(tiles, x, y);
+                        }
+
+                        @Override
+                        public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                            super.whenBroken(tiles, x, y, brokenByEntity);
+                        }
+
+                        @Override
+                        public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+
+                        @Override
+                        public void onRandomUpdate(Tile[][] tiles, int x, int y) {
+                            //Do nothing
+                        }
+                    };
+                    finalTile.dropItemID = ItemID.TILE_AIR;
+                }
+                return finalTile;
+            }
         }
     }
 
     static class WorldGeneration {
         static class OverworldGeneration implements TileGeneration {
-            private static final int SEA_LEVEL = Game.tiles[0].length/16;
+            /***/private static final int SEA_LEVEL = Game.tiles[0].length/16;
 
             @Override
             public Tile[][] generateBase(Tile[][] tiles) {
@@ -265,9 +627,9 @@ public class Tiles {
                     for (int y = 0; y < tiles[x].length; y++) {
                         int perlinY = (int) Math.round(perlin1D.cosInterpolation((double) x/10)*8)-4;
                         if(y < (SEA_LEVEL + perlinY)){
-                            tiles[x][y] = TilePresets.getTilePreset(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_AIR);
+                            tiles[x][y] = Tile.TilePresets.getTilePreset(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_AIR);
                         }else{
-                            tiles[x][y] = TilePresets.getTilePreset(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_STONE);
+                            tiles[x][y] = Tile.TilePresets.getTilePreset(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_STONE);
                         }
                     }
                 }
@@ -277,9 +639,9 @@ public class Tiles {
                 for (int x = 0; x < tiles.length; x++) {
                     for (int y = 0; y < tiles[x].length; y++) {
                         if(tiles[x][y].itemID == ItemID.TILE_STONE){
-                            tiles[x][y] = TilePresets.getTilePreset(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_DIRT_GRASS);
+                            tiles[x][y] = Tile.TilePresets.getTilePreset(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_DIRT_GRASS);
                             for (int z = 1; z < ((perlin1D.cosInterpolation(((double) x/6)) * 4)+1); z++) {
-                                tiles[x][y + z] = TilePresets.getTilePreset(x * TILE_WIDTH, (y + z) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_DIRT);
+                                tiles[x][y + z] = Tile.TilePresets.getTilePreset(x * TILE_WIDTH, (y + z) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_DIRT);
                             }
                             break;
                         }
@@ -402,14 +764,14 @@ public class Tiles {
                     for (int y = 0; y < tiles[x].length - 1; y++) {
                         if (stalactiteRocks.contains(tiles[x][y].itemID) && tiles[x][y + 1].itemID == ItemID.TILE_AIR) {
                             if (STALACTITE_CHANCE > Game.WORLD_RANDOM.nextDouble()) {
-                                tiles[x][y + 1] = TilePresets.getTilePreset(x * TILE_WIDTH, (y + 1) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_STALACTITE);
+                                tiles[x][y + 1] = Tile.TilePresets.getTilePreset(x * TILE_WIDTH, (y + 1) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_STALACTITE);
                                 tiles[x][y + 1].hasTransparency = true;
                                 hasStalactite = true;
                             }
                         }
                         if (stalactiteRocks.contains(tiles[x][y].itemID) && tiles[x][y].itemID != ItemID.TILE_AIR && tiles[x][y - 1].itemID == ItemID.TILE_AIR && hasStalactite) {
                             if (STALAGMITE_CHANCE > Game.WORLD_RANDOM.nextDouble()) {
-                                tiles[x][y - 1] = TilePresets.getTilePreset(x * TILE_WIDTH, (y - 1) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_STALAGMITE);
+                                tiles[x][y - 1] = Tile.TilePresets.getTilePreset(x * TILE_WIDTH, (y - 1) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_STALAGMITE);
                                 tiles[x][y - 1].hasTransparency = true;
                             }
                             hasStalactite = false;
@@ -421,17 +783,41 @@ public class Tiles {
                 return tiles;
             }
 
+            /**
+             *
+             * @param tiles
+             * @param perlin2D
+             * @param targetTileID
+             * @param oreTileID
+             * @param startingThreshold
+             * @param endingThreshold
+             * @param verticalStretch
+             * @param horizontalStretch
+             * @param startingLevel
+             * @param endingLevel
+             */
             private void generateOreVeins(Tile[][] tiles, PerlinNoise.Perlin2D perlin2D, ItemID targetTileID, ItemID oreTileID, double startingThreshold, double endingThreshold, int verticalStretch, int horizontalStretch, int startingLevel, int endingLevel){
                 for (int x = 0; x < tiles.length; x++) {
                     for (int y = startingLevel; y < endingLevel; y++) {
                         double currentThreshold = startingThreshold * (1 - ((double) (y-startingLevel)/((endingLevel-startingLevel)-1))) + endingThreshold * ((double) (y-startingLevel)/((endingLevel-startingLevel)-1));
                         if(perlin2D.cosInterpolation((double) x/horizontalStretch, (double) y/verticalStretch) >= currentThreshold && (tiles[x][y].itemID == targetTileID || targetTileID == null)){
-                            tiles[x][y] = TilePresets.getTilePreset(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, oreTileID);
+                            tiles[x][y] = Tile.TilePresets.getTilePreset(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, oreTileID);
                         }
                     }
                 }
             }
 
+            /**
+             *
+             * @param tiles
+             * @param perlin2D
+             * @param startingThreshold
+             * @param endingThreshold
+             * @param verticalStretch
+             * @param horizontalStretch
+             * @param startingLevel
+             * @param endingLevel
+             */
             private void generateCavitySection(Tile[][] tiles, PerlinNoise.Perlin2D perlin2D, double startingThreshold, double endingThreshold, int verticalStretch, int horizontalStretch, int startingLevel, int endingLevel){
                 for (int x = 0; x < tiles.length; x++) {
                     for (int y = startingLevel; y < endingLevel; y++) {
@@ -439,324 +825,11 @@ public class Tiles {
                         double currentThreshold = startingThreshold * (1 - ((double) (y-startingLevel)/((endingLevel-startingLevel)-1))) + endingThreshold * ((double) (y-startingLevel)/((endingLevel-startingLevel)-1));
 
                         if(perlin2D.cosInterpolation((double) x/horizontalStretch, (double) y/verticalStretch) >= currentThreshold){
-                            tiles[x][y] = TilePresets.getTilePreset(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_AIR);
+                            tiles[x][y] = Tile.TilePresets.getTilePreset(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_AIR);
                         }
                     }
                 }
             }
-        }
-    }
-    protected static class TilePresets{
-        public static Tile getTilePreset(int x, int y, int width, int height, ItemID tileID){
-            Tile finalTile;
-            if(tileID == ItemID.TILE_AIR){
-                finalTile = new Tile(x, y, width, height, ItemID.TILE_AIR){
-                    @Override
-                    public void whenClicked(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void whenPlaced(Tile[][] tiles, int x, int y) {
-                        super.whenPlaced(tiles, x, y);
-                    }
-
-                    @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y) {
-                        super.whenBroken(tiles, x, y);
-                    }
-
-                    @Override
-                    public void onTileUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void onRandomUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-                };
-            }else if(tileID == ItemID.TILE_STONE){
-                finalTile = new Tile(x, y, width, height, ItemID.TILE_STONE){
-                    @Override
-                    public void whenClicked(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void whenPlaced(Tile[][] tiles, int x, int y) {
-                        super.whenPlaced(tiles, x, y);
-                    }
-
-                    @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y) {
-                        super.whenBroken(tiles, x, y);
-                    }
-
-                    @Override
-                    public void onTileUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void onRandomUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-                };
-            }else if(tileID == ItemID.TILE_DIRT_GRASS) {
-                finalTile = new Tile(x, y, width, height, ItemID.TILE_DIRT_GRASS){
-                    @Override
-                    public void whenClicked(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void whenPlaced(Tile[][] tiles, int x, int y) {
-                        super.whenPlaced(tiles, x, y);
-                    }
-
-                    @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y) {
-                        super.whenBroken(tiles, x, y);
-                    }
-
-                    @Override
-                    public void onTileUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void onRandomUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-                };
-            }else if(tileID == ItemID.TILE_DIRT) {
-                finalTile = new Tile(x, y, width, height, ItemID.TILE_DIRT){
-                    @Override
-                    public void whenClicked(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void whenPlaced(Tile[][] tiles, int x, int y) {
-                        super.whenPlaced(tiles, x, y);
-                    }
-
-                    @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y) {
-                        super.whenBroken(tiles, x, y);
-                    }
-
-                    @Override
-                    public void onTileUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void onRandomUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-                };
-            }else if(tileID == ItemID.TILE_COAL_ORE){
-                finalTile = new Tile(x, y, width, height, ItemID.TILE_COAL_ORE){
-                    @Override
-                    public void whenClicked(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void whenPlaced(Tile[][] tiles, int x, int y) {
-                        super.whenPlaced(tiles, x, y);
-                    }
-
-                    @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y) {
-                        super.whenBroken(tiles, x, y);
-                    }
-
-                    @Override
-                    public void onTileUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void onRandomUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-                };
-            }else if(tileID == ItemID.TILE_IRON_ORE){
-                finalTile = new Tile(x, y, width, height, ItemID.TILE_IRON_ORE){
-                    @Override
-                    public void whenClicked(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void whenPlaced(Tile[][] tiles, int x, int y) {
-                        super.whenPlaced(tiles, x, y);
-                    }
-
-                    @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y) {
-                        super.whenBroken(tiles, x, y);
-                    }
-
-                    @Override
-                    public void onTileUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void onRandomUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-                };
-            }else if(tileID == ItemID.TILE_GOLD_ORE){
-                finalTile = new Tile(x, y, width, height, ItemID.TILE_GOLD_ORE){
-                    @Override
-                    public void whenClicked(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void whenPlaced(Tile[][] tiles, int x, int y) {
-                        super.whenPlaced(tiles, x, y);
-                    }
-
-                    @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y) {
-                        super.whenBroken(tiles, x, y);
-                    }
-
-                    @Override
-                    public void onTileUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void onRandomUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-                };
-            }else if(tileID == ItemID.TILE_DIAMOND_ORE){
-                finalTile = new Tile(x, y, width, height, ItemID.TILE_DIAMOND_ORE){
-                    @Override
-                    public void whenClicked(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void whenPlaced(Tile[][] tiles, int x, int y) {
-                        super.whenPlaced(tiles, x, y);
-                    }
-
-                    @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y) {
-                        super.whenBroken(tiles, x, y);
-                    }
-
-                    @Override
-                    public void onTileUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void onRandomUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-                };
-            }else if(tileID == ItemID.TILE_STALACTITE){
-                finalTile = new Tile(x, y, width, height, ItemID.TILE_STALACTITE){
-                    @Override
-                    public void whenClicked(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void whenPlaced(Tile[][] tiles, int x, int y) {
-                        super.whenPlaced(tiles, x, y);
-                    }
-
-                    @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y) {
-                        super.whenBroken(tiles, x, y);
-                    }
-
-                    @Override
-                    public void onTileUpdate(Tile[][] tiles, int x, int y) {
-                        if(y>0){
-                            if(tiles[x][y-1].itemID == ItemID.TILE_AIR && this.itemID != ItemID.TILE_AIR){
-                                this.whenBroken(tiles, x, y);
-                                Game.movingObjects.add(new FallingStalactite(x * TILE_WIDTH, y * TILE_HEIGHT, this.hitbox.width, this.hitbox.height, ImageProcessing.resizeImage(ImageProcessing.removeNullPixels(this.texture), 4)));
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onRandomUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-                };
-            }else if(tileID == ItemID.TILE_STALAGMITE){
-                finalTile = new Tile(x, y, width, height, ItemID.TILE_STALAGMITE){
-                    @Override
-                    public void whenClicked(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void whenPlaced(Tile[][] tiles, int x, int y) {
-                        super.whenPlaced(tiles, x, y);
-                    }
-
-                    @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y) {
-                        super.whenBroken(tiles, x, y);
-                    }
-
-                    @Override
-                    public void onTileUpdate(Tile[][] tiles, int x, int y) {
-                        if(y<tiles[0].length-1){
-                            if(tiles[x][y+1].itemID == ItemID.TILE_AIR){
-                                this.whenBroken(tiles, x, y);
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onRandomUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-                };
-            }else{
-                finalTile = new Tile(x, y, width, height, ItemID.TILE_AIR) {
-                    @Override
-                    public void whenClicked(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void whenPlaced(Tile[][] tiles, int x, int y) {
-                        super.whenPlaced(tiles, x, y);
-                    }
-
-                    @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y) {
-                        super.whenBroken(tiles, x, y);
-                    }
-
-                    @Override
-                    public void onTileUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-
-                    @Override
-                    public void onRandomUpdate(Tile[][] tiles, int x, int y) {
-                        //Do nothing
-                    }
-                };
-            }
-            return finalTile;
         }
     }
 }
