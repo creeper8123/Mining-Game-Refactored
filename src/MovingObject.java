@@ -28,12 +28,12 @@ public abstract class MovingObject {
 
         this.textureLabel = new JLabel();
         this.textureLabel.setBounds(hitbox);
-        this.textureLabel.setIcon(new ImageIcon(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources(textureLocation)), 4)));
+        this.textureLabel.setIcon(new ImageIcon(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources(textureLocation)), 4, 4)));
 
         postInitialization();
 
         Game.layeredPane.add(textureLabel);
-        Game.layeredPane.setLayer(textureLabel, MovingObject.MOVING_OBJECT_LAYER);
+        Game.layeredPane.setLayer(textureLabel, ImageProcessing.MOVING_OBJECT_LAYER);
     }
 
     /**
@@ -61,10 +61,8 @@ public abstract class MovingObject {
         postInitialization();
 
         Game.layeredPane.add(textureLabel);
-        Game.layeredPane.setLayer(textureLabel, MovingObject.MOVING_OBJECT_LAYER);
+        Game.layeredPane.setLayer(textureLabel, ImageProcessing.MOVING_OBJECT_LAYER);
     }
-
-    /**The layer of the JLayeredPane that moving objects will be assigned to.*/static final int MOVING_OBJECT_LAYER = 3;
 
     //Default values, can be changed in objects extends MovingObject
     /**The ArrayList of ItemIDs that the moving object will not check for collisions on.*/ArrayList<ItemID> nonSolidTiles = new ArrayList<>(List.of(ItemID.TILE_AIR));

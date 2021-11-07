@@ -12,7 +12,6 @@ public class Tiles {
     /***/public static final int TILE_BASE_HEIGHT = 16;
 
     static class TileGraphics implements MouseListener {
-        /***/public static final int TILE_LAYER = 2;
 
         /***/public JLabel textureLabel;
         /***/public BufferedImage texture;
@@ -24,7 +23,7 @@ public class Tiles {
             textureLabel = new JLabel();
             textureLabel.setSize(TILE_WIDTH, Game.tiles[0].length * TILE_HEIGHT);
             Game.layeredPane.add(textureLabel);
-            Game.layeredPane.setLayer(textureLabel, TILE_LAYER);
+            Game.layeredPane.setLayer(textureLabel, ImageProcessing.TILE_LAYER);
             textureLabel.addMouseListener(this);
         }
 
@@ -177,7 +176,7 @@ public class Tiles {
                 }
             }
             this.texture = chunkTexture;
-            redrawChunk(ImageProcessing.resizeImage(texture, 4));
+            redrawChunk(ImageProcessing.resizeImage(texture, 4, 4));
         }
 
         @Override
@@ -534,7 +533,7 @@ public class Tiles {
                             if(y>0){
                                 if(tiles[x][y-1].itemID == ItemID.TILE_AIR && this.itemID != ItemID.TILE_AIR){
                                     this.whenBroken(tiles, x, y, null);
-                                    Game.movingObjects.add(new FallingStalactite(x * TILE_WIDTH, y * TILE_HEIGHT, this.hitbox.width, this.hitbox.height, ImageProcessing.resizeImage(ImageProcessing.removeNullPixels(this.texture), 4)));
+                                    Game.movingObjects.add(new FallingStalactite(x * TILE_WIDTH, y * TILE_HEIGHT, this.hitbox.width, this.hitbox.height, ImageProcessing.resizeImage(ImageProcessing.removeNullPixels(this.texture), 4, 4)));
                                 }
                             }
                         }

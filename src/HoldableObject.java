@@ -170,6 +170,9 @@ public class HoldableObject {
     }
 
     public String generateDisplayName(ItemID itemID){
+        if(itemID == null){
+            return "Empty";
+        }
         switch(itemID){
             case TILE_AIR -> {
                 return "Air";

@@ -12,6 +12,10 @@ public class ImageProcessing{
     /**Pixels of this colour have the option to be rendered with full transparency.*/public static final Color NULL_COLOR = new Color(255, 82, 255, 255); //Use for green 32 in GIMP, for some reason it comes out as 82. Continue to use 32 in GIMP and 82 here.
     /**The colour to render the sky as.*/public static final Color SKY_COLOR = new Color(0, 191, 255, 255);
 
+    /***/public static final int TILE_LAYER = 2;
+    /**The layer of the JLayeredPane that moving objects will be assigned to.*/static final int MOVING_OBJECT_LAYER = 3;
+    /***/public static final int MENU_LAYER = 4;
+
     /**
      * Retrieves a texture from the resources folder. Note that "resources/" is automatically added to the front of the filepath.
      * @param filepath The location in the resources folder of the desired texture.
@@ -178,8 +182,8 @@ public class ImageProcessing{
      * @param scaleFactor The factor of the original size to be the new scale.
      * @return Returns a scaled up version of the input BufferedImage.
      */
-    public static BufferedImage resizeImage(BufferedImage inputBufferedImage, int scaleFactor){
-        return ImageProcessing.imageToBufferedImage(inputBufferedImage.getScaledInstance(inputBufferedImage.getWidth() * scaleFactor, inputBufferedImage.getHeight() * scaleFactor, Image.SCALE_REPLICATE));
+    public static BufferedImage resizeImage(BufferedImage inputBufferedImage, int widthScaleFactor, int heightScaleFactor){
+        return ImageProcessing.imageToBufferedImage(inputBufferedImage.getScaledInstance(inputBufferedImage.getWidth() * widthScaleFactor, inputBufferedImage.getHeight() * heightScaleFactor, Image.SCALE_REPLICATE));
         //TODO: Get the NULL_COLOR pixels from the original image to reset the alpha pixels, as one of these methods breaks the alpha value.
     }
 }

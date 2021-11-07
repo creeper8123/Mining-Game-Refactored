@@ -21,6 +21,8 @@ public class Game{
     /**The list of chunks that store the textures and handle tile breaking.*/public static Tiles.TileGraphics[] chunks;
     /**A copy of tiles used to generate the background textures.*/public static Tiles.Tile[][] backgroundTiles;
     /**The size of the screen.*/protected static Dimension screenSize;
+    public static int screenX;
+    public static int screenY;
     /**The list of currently active moving objects to update each game tick. The Player will always be the 1st object in the ArrayList.*/public static ArrayList<MovingObject> movingObjects = new ArrayList<>();
     /**The number of tiles to randomly select per tick. The same tile can be selected multiple times.*/private static final int RANDOM_SELECTIONS_PER_CHUNK_PER_UPDATE = 1;
     /**The current iteration that the game is on. Updated as the final step of each tick*/public static long updateNum = 0;
@@ -82,6 +84,9 @@ public class Game{
 
         frame.setVisible(true);
 
+        System.out.println();
+        System.out.println("World Seed: " + WORLD_RANDOM_SEED + "L");
+
         Tiles.WorldGeneration.OverworldGeneration owg = new Tiles.WorldGeneration.OverworldGeneration(){
             @Override
             public Tiles.Tile[][] generate(Tiles.Tile[][] tiles, String levelName) {
@@ -116,7 +121,6 @@ public class Game{
         System.out.println("Tile texture generation complete");
         System.out.println("Completed in " + (int) ((System.nanoTime() - startTime)*0.000001) + " Milliseconds");
 
-        /***/
         int spawnChunksLength = 0;
         chunks = new Tiles.TileGraphics[tiles.length];
 
@@ -140,7 +144,7 @@ public class Game{
                 chunks[i].stitchBackgroundTexture(backgroundTiles[i]);
                 chunks[i].stitchTexture(tiles[i]);
                 chunks[i].textureLabel.setLocation(i* Tiles.TILE_WIDTH, 0);
-                chunks[i].redrawChunk(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(chunks[i].texture), 4));
+                chunks[i].redrawChunk(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(chunks[i].texture), 4, 4));
             }
             System.out.println("100.000% (" + chunks.length + "/" + chunks.length + ")");
             System.out.println("Chunk texture stitching complete");
@@ -165,22 +169,22 @@ public class Game{
      * @param height The width the object that the camera will follow.
      */
     public static void moveCamera(double x, double y, int width, int height){
-        int paneNewX = ((int) -Math.round(x)) + ((frame.getWidth() - width)/2);
-        int paneNewY = ((int) -Math.round(y)) + ((frame.getHeight() - height)/2);
+        screenX = ((int) -Math.round(x)) + ((frame.getWidth() - width)/2);
+        screenY = ((int) -Math.round(y)) + ((frame.getHeight() - height)/2);
 
-        if(paneNewX > 0){
-            paneNewX = 0;
-        }else if(paneNewX < frame.getWidth() - layeredPane.getWidth() - (width/2)){
-            paneNewX = frame.getWidth() - layeredPane.getWidth() - (width/2);
+        if(screenX > 0){
+            screenX = 0;
+        }else if(screenX < frame.getWidth() - layeredPane.getWidth() - (width/2)){
+            screenX = frame.getWidth() - layeredPane.getWidth() - (width/2);
         }
 
-        if(paneNewY > 0){
-            paneNewY = 0;
-        }else if(paneNewY < frame.getHeight() - layeredPane.getHeight() - (height/2)){
-            paneNewY = frame.getHeight() - layeredPane.getHeight() - (height/2);
+        if(screenY > 0){
+            screenY = 0;
+        }else if(screenY < frame.getHeight() - layeredPane.getHeight() - (height/2)){
+            screenY = frame.getHeight() - layeredPane.getHeight() - (height/2);
         }
 
-        layeredPane.setLocation(paneNewX, paneNewY);
+        layeredPane.setLocation(screenX, screenY);
     }
 
     /**

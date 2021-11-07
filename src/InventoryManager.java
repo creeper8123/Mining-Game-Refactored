@@ -283,6 +283,10 @@ public class InventoryManager {
         return false;
     }
 
+    public ItemStack[] getInventory() {
+        return inventory;
+    }
+
     /**
      * Gets the ItemStack at a certain index.
      * @param i The index to retrieve from.

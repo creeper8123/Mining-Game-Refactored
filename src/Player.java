@@ -15,7 +15,65 @@ public class Player extends MovingObject implements KeyListener {
     @Override
     public void postInitialization(){
         Game.frame.addKeyListener(this);
-        this.inventory = new InventoryManager(10);
+        this.inventory = new InventoryManager(10) {
+            @Override
+            public int addToInventory(HoldableObject holdableObject, int quantity) {
+                int result = super.addToInventory(holdableObject, quantity);
+                inventoryMenu.configureMenuContents();
+                return result;
+            }
+
+            @Override
+            public int addToInventory(HoldableObject holdableObject, int quantity, int i) {
+                int result = super.addToInventory(holdableObject, quantity, i);
+                inventoryMenu.configureMenuContents();
+                return result;
+            }
+
+            @Override
+            public int removeFromInventory(HoldableObject holdableObject, int quantity) {
+                int result = super.removeFromInventory(holdableObject, quantity);
+                inventoryMenu.configureMenuContents();
+                return result;
+            }
+
+            @Override
+            public int removeFromInventory(HoldableObject holdableObject, int quantity, int i){
+                int result = super.removeFromInventory(holdableObject, quantity, i);
+                inventoryMenu.configureMenuContents();
+                return result;
+            }
+
+            @Override
+            public void sortInventory(){
+                super.sortInventory();
+                inventoryMenu.configureMenuContents();
+            }
+        };
+        this.inventoryMenu = new MenuDisplay<>(){
+            @Override
+            public void configureMenuContents(){
+                this.menuDisplayContents = new String[menuContents.length];
+                for (int i = 0; i < this.menuDisplayContents.length; i++) {
+                    if(this.menuContents[i] == null || this.menuContents[i].holdableObject == null || this.menuContents[i].holdableObject.itemID == null){
+                        this.menuDisplayContents[i] = "[Empty]";
+                    }else{
+                        this.menuDisplayContents[i] = "[" + this.menuContents[i].holdableObject.displayName + " *" + this.menuContents[i].quantity + "]";
+                    }
+                }
+                this.fullMenuDisplayContents = "<html><body><u>" + menuTitle + "</u>";
+                for (String menuDisplayContent : this.menuDisplayContents) {
+                    this.fullMenuDisplayContents += "<br>" + menuDisplayContent;
+                }
+                this.fullMenuDisplayContents += "</body></html>";
+                this.menu.setText(fullMenuDisplayContents);
+                System.out.println(fullMenuDisplayContents);
+            }
+        };
+        this.inventoryMenu.setMenuTitle("Player Inventory");
+        inventoryMenu.setMenuContents(inventory.getInventory());
+        inventoryMenu.configureMenuContents();
+        inventoryMenu.setVisibility(true);
     }
 
     /***/boolean upPressed;
@@ -24,10 +82,13 @@ public class Player extends MovingObject implements KeyListener {
     /***/boolean rightPressed;
     /***/boolean sprintPressed;
 
+    /***/MenuDisplay<InventoryManager.ItemStack> inventoryMenu;
+
     @Override
     public void onUpdate() {
         this.calculateNewPosition();
         Game.moveCamera(x, y, width, height);
+        inventoryMenu.setPosition(-Game.screenX, -Game.screenY);
     }
 
     //TODO: Fix dead stop on landing bug.
@@ -108,7 +169,6 @@ public class Player extends MovingObject implements KeyListener {
 
     @Override
     public void keyTyped(KeyEvent e) {
-
     }
 
 
@@ -132,6 +192,7 @@ public class Player extends MovingObject implements KeyListener {
             case 38, 87, 32 -> this.upPressed = false;
             case 39, 68 -> this.rightPressed = false;
             case 40, 83 -> this.downPressed = false;
+            case 69 -> this.inventoryMenu.toggleVisibility();
         }
     }
 
