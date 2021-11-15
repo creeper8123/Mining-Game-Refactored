@@ -89,14 +89,14 @@ public abstract class MovingObject {
     /**The current vertical speed of the object.*/double ySpeed = 0.0;
     /**The current horizontal speed the object is trying to reach.*/double xSpeedTarget = 0.0;
     /**The current vertical speed the object is trying to reach.*/double ySpeedTarget = 0.0;
-    /**The amount that the xSpeed will change per update when moving to a different speed.*/double xSpeedAcceleration = 0.01 * Game.MILLISECONDS_PER_UPDATE;
-    /**The maximum xSpeed of the object under normal circumstances.*/double xSpeedLimit = 0.3125 * Game.MILLISECONDS_PER_UPDATE;
+    /**The amount that the xSpeed will change per update when moving to a different speed.*/double xSpeedAcceleration = 0.16;
+    /**The maximum xSpeed of the object under normal circumstances.*/double xSpeedLimit = 5;
     /**The multiplier of xSpeedLimit when the object is trying to sprint.*/double sprintSpeedMultiplier = 1.33;
     /**The value that the ySpeed will be set to if the object is touching the ground and the up flag is set.*/double jumpForce = 10;
-    /**The highest value that ySpeed can be under normal circumstances.*/double terminalVelocity = 1.5625 * Game.MILLISECONDS_PER_UPDATE;
+    /**The highest value that ySpeed can be under normal circumstances.*/double terminalVelocity = 25;
     /**The multiplier of xSpeedAcceleration when the object is in the air.*/double airborneManeuverabilityMultiplier = 0.25;
-    /**The value that, if the difference between the current speed and the target speed is less than, the current speed will be set to the target speed.*/double speedDeadZone = 0.00625 * Game.MILLISECONDS_PER_UPDATE;
-    /**The value that's added to the ySpeed every update if the object is not on the ground.*/double gravity = 0.025 * Game.MILLISECONDS_PER_UPDATE;
+    /**The value that, if the difference between the current speed and the target speed is less than, the current speed will be set to the target speed.*/double speedDeadZone = 0.1;
+    /**The value that's added to the ySpeed every update if the object is not on the ground.*/double gravity = 0.4;
 
     /**The flag for if the object has the ability to sprint.*/boolean canSprint = true;
     /**The flag for if the object is affected by gravity*/boolean hasGravity = true; //TODO: make objects with no gravity float towards ySpeed 0, using the gravity value as a dampener rate.

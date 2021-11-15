@@ -32,7 +32,8 @@ public class FallingStalactite extends MovingObject{
 
     @Override
     public void postInitialization() {
-        this.terminalVelocity = 35;
+        this.gravity *= 1.25;
+        this.terminalVelocity *= 1.25;
         this.textureXOffset = -20;
         this.hitbox = new Rectangle(hitbox.x - textureXOffset, hitbox.y - textureYOffset, hitbox.width, hitbox.height);
         this.x -= textureXOffset;

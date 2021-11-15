@@ -12,25 +12,30 @@ import java.util.*;
  */
 public class Game{
     /**The number of milliseconds between ticks.*/public static final long MILLISECONDS_PER_UPDATE = 16;
-    /**The seed of the world, and all world related generation.*/public static final long WORLD_RANDOM_SEED = new Random().nextLong();
+    /**The seed of the world, and all world related generation.*/public static final long WORLD_RANDOM_SEED = new Random().nextLong();//1537182761089763510L;//
     /**The random number generator used for terrain and terrain texture generation.*/public static final Random WORLD_RANDOM = new Random(WORLD_RANDOM_SEED);
+    public static final Random TICK_RANDOM = new Random();
+    public static final Random MOVING_OBJECT_RANDOM = new Random();
     /**The frame that the game is in.*/public static JFrame frame = new JFrame();
     /**The layered pane that the textures are shown on, and that separates the layers into manageable sections.*/public static JLayeredPane layeredPane = new JLayeredPane();
-    /**The timer that the game ticks are looped in.*/public Timer mainGameLoop;
+    /**The timer that the game ticks are looped in.*/public static Timer mainGameLoop;
     /**The 2D-list of tiles that make up the world.*/public static Tiles.Tile[][] tiles;
     /**The list of chunks that store the textures and handle tile breaking.*/public static Tiles.TileGraphics[] chunks;
     /**A copy of tiles used to generate the background textures.*/public static Tiles.Tile[][] backgroundTiles;
     /**The size of the screen.*/protected static Dimension screenSize;
-    public static int screenX;
-    public static int screenY;
+    /***/public static int screenX;
+    /***/public static int screenY;
     /**The list of currently active moving objects to update each game tick. The Player will always be the 1st object in the ArrayList.*/public static ArrayList<MovingObject> movingObjects = new ArrayList<>();
+    /***/public static Player player;
     /**The number of tiles to randomly select per tick. The same tile can be selected multiple times.*/private static final int RANDOM_SELECTIONS_PER_CHUNK_PER_UPDATE = 1;
     /**The current iteration that the game is on. Updated as the final step of each tick*/public static long updateNum = 0;
-    /**The flag to save all the chunk textures to a .png file.*/public final boolean SAVE_MAP_AS_PHOTO = false;
+    /**The flag to save all the chunk textures to a .png file.*/public static final boolean SAVE_MAP_AS_PHOTO = false;
     /**The task that defines what happens in a game tick.*/public static TimerTask mainGameLoopTask = new TimerTask() {
         @Override
         public void run() {
             /*------------------------------------BEGIN MAIN LOOP------------------------------------*/
+            player.onUpdate();
+
             for (int i = 0; i < movingObjects.size(); i++) {
                 int oldSize = movingObjects.size();
                 movingObjects.get(i).onUpdate(); //Do not replace with enhanced loop, deconstruction will throw a ConcurrentModificationExceptions
@@ -39,24 +44,19 @@ public class Game{
                 }
             }
 
-            for (int x = 0; x < chunks.length; x++) {
-                if(chunks[x] != null && chunks[x].yValues.size()>0){
-                    chunks[x].modifyChunk(x, chunks[x].yValues);
-                    for (int i = 0; i < chunks[x].yValues.size(); i++) {
-                        chunks[x].yValues.remove(i);
-                    }
-                }
-            }
+            //TODO: Move texture updates to a separate thread.
 
+
+            //TODO: Restore random update functionality after testing.
             for (int x = 0; x < tiles.length; x++) {
                 for (int i = 0; i < RANDOM_SELECTIONS_PER_CHUNK_PER_UPDATE; i++) {
-                    int y = (int) Math.floor(Math.random() * tiles[x].length);
-                    tiles[x][y].onRandomUpdate(tiles, x, y);
+                    int y = (int) Math.floor(TICK_RANDOM.nextDouble() * tiles[x].length);
+                    tiles[x][y].onRandomUpdate(tiles, x, y, false);
                 }
             }
 
             updateNum++;
-            /*-------------------------------------END MAIN LOOP-------------------------------------*/
+            /*--------------------------------------END MAIN LOOP--------------------------------------*/
         }
     };
 
@@ -64,11 +64,12 @@ public class Game{
      * The method to start the game&#46; First the map is generated, then individual tile textures are generated, then the game starts&#46; After the game starts, chunks are created, their textures are stitched, and they are inserted into the world.
      */
     public Game(){
-        tiles = new Tiles.Tile[256][256]; //[# of chunks][length of each chunk]
+        //TODO: Have multiple different levels, and re-call the texture generation methods on the fly for each separate level. A loading screen will be necessary.
+        tiles = new Tiles.Tile[256][256]; //[# of chunks][height of each chunk], limit is 100,000 tiles per level.
         backgroundTiles = new Tiles.Tile[tiles.length][tiles[0].length];
 
         frame.setTitle("the game is loading lol"); //Best loading message.
-        frame.setIconImage(ImageProcessing.getImageFromResources("textures/missingTexture.png"));
+        frame.setIconImage(ImageProcessing.getImageFromResources("textures/missingTexture.png")); //TODO: Create and implement a proper icon.
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocation(0, 0);
         frame.setSize(Toolkit.getDefaultToolkit().getScreenSize());
@@ -77,8 +78,9 @@ public class Game{
         frame.getContentPane().setBackground(ImageProcessing.SKY_COLOR);
         screenSize = frame.getSize();
         frame.getContentPane().add(layeredPane);
+
         layeredPane.setLocation(0, 0);
-        layeredPane.setSize(Tiles.TILE_WIDTH * tiles.length, tiles[0].length * Tiles.TILE_HEIGHT);//(tiles.length * Tiles.TILE_WIDTH)
+        layeredPane.setSize(Tiles.TILE_WIDTH * tiles.length, tiles[0].length * Tiles.TILE_HEIGHT);
         layeredPane.setLayout(null);
         layeredPane.setVisible(true);
 
@@ -93,11 +95,18 @@ public class Game{
                 System.out.println();
                 System.out.println("Beginning " + levelName + " map generation...");
                 long startTime = System.nanoTime();
-                tiles = generateOres(generateBase(tiles));
+                tiles = generateBase(tiles);
                 for (int i = 0; i < tiles.length; i++) {
                     backgroundTiles[i] = Arrays.copyOf(tiles[i], tiles[i].length);
                 }
-                tiles = generateDetails(generatePortals(generateWorldFloor(generateCavities(tiles))));
+                for (int x = 0; x < backgroundTiles.length; x++) {
+                    for (int y = 0; y < backgroundTiles[x].length; y++) {
+                        if(backgroundTiles[x][y].itemID != ItemID.TILE_STONE){
+                            backgroundTiles[x][y] = Tiles.Tile.TilePresets.getTilePreset(x * Tiles.TILE_WIDTH, y * Tiles.TILE_HEIGHT, Tiles.TILE_WIDTH, Tiles.TILE_HEIGHT, ItemID.TILE_AIR);
+                        }
+                    }
+                }
+                tiles = generateDetails(generatePortals(generateWorldFloor(generateCavities(generateOres(tiles)))));
                 System.out.println();
                 System.out.println();
                 System.out.println("Map generation complete");
@@ -120,45 +129,19 @@ public class Game{
         System.out.println("100.000% (" + tiles.length * tiles[0].length + "/" + tiles.length * tiles[0].length + ")");
         System.out.println("Tile texture generation complete");
         System.out.println("Completed in " + (int) ((System.nanoTime() - startTime)*0.000001) + " Milliseconds");
-
-        int spawnChunksLength = 0;
         chunks = new Tiles.TileGraphics[tiles.length];
 
         int playerSpawnX = 0;
         for (int y = 0; y < tiles[playerSpawnX].length; y++) {
             if(tiles[playerSpawnX][y].itemID != ItemID.TILE_AIR && tiles[playerSpawnX][y].itemID != ItemID.TILE_AIR){
-                movingObjects.add(new Player(playerSpawnX * Tiles.TILE_WIDTH, (y * Tiles.TILE_HEIGHT)-Player.PLAYER_HEIGHT));
+                player = new Player(playerSpawnX * Tiles.TILE_WIDTH, (y * Tiles.TILE_HEIGHT)-Player.PLAYER_HEIGHT);
                 break;
             }
         }
 
-        frame.setTitle("add title here"); //TODO: Come up with, and add, a proper title.
+        frame.setTitle("Underminer"); //TODO: Come up with, and add, a proper title.
 
-        Thread gameBackgroundGeneration = new Thread(() -> {
-            System.out.println();
-            System.out.println("Beginning chunk texture stitching...");
-            long startTime1 = System.nanoTime();
-            for (int i = 0; i < chunks.length; i++) {
-                System.out.printf("%07.3f%% (%0" + String.valueOf(chunks.length).length() + "d/%0" + String.valueOf(chunks.length).length() + "d)\n", ((double) (i*100)/chunks.length), i, chunks.length);
-                chunks[i] = new Tiles.TileGraphics();
-                chunks[i].stitchBackgroundTexture(backgroundTiles[i]);
-                chunks[i].stitchTexture(tiles[i]);
-                chunks[i].textureLabel.setLocation(i* Tiles.TILE_WIDTH, 0);
-                chunks[i].redrawChunk(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(chunks[i].texture), 4, 4));
-            }
-            System.out.println("100.000% (" + chunks.length + "/" + chunks.length + ")");
-            System.out.println("Chunk texture stitching complete");
-            System.out.println("Completed in " + (int) ((System.nanoTime() - startTime1)*0.000001) + " Milliseconds");
-            if(SAVE_MAP_AS_PHOTO){
-                System.out.println();
-                System.out.println("Saving textures as photo...");
-                saveChunkTexturesAsImage("output\\World Maps\\" + WORLD_RANDOM_SEED, chunks);
-            }
-        });
-        gameBackgroundGeneration.start();
-
-        mainGameLoop = new Timer();
-        mainGameLoop.scheduleAtFixedRate(mainGameLoopTask, 0, MILLISECONDS_PER_UPDATE);
+        startUpdating();
     }
 
     /**
@@ -209,5 +192,49 @@ public class Game{
         }catch(IOException e){
             e.printStackTrace();
         }
+    }
+
+    private static void startUpdating(){
+        Game.mainGameLoop = new Timer();
+        Game.mainGameLoop.scheduleAtFixedRate(mainGameLoopTask, 0, MILLISECONDS_PER_UPDATE);
+
+        Thread updateTextures = new Thread(() -> {
+            while(true){
+                for (int x = 0; x < chunks.length; x++) {
+                    if(chunks[x] != null && chunks[x].yValues.size()>0){
+                        chunks[x].modifyChunk(x, chunks[x].yValues);
+                        for (int i = 0; i < chunks[x].yValues.size(); i++) {
+                            chunks[x].yValues.remove(i);
+                        }
+                    }
+                }
+            }
+        });
+
+
+        Thread gameBackgroundGeneration = new Thread(() -> {
+            System.out.println();
+            System.out.println("Beginning chunk texture stitching...");
+            long startTime1 = System.nanoTime();
+            for (int i = 0; i < chunks.length; i++) {
+                System.out.printf("%07.3f%% (%0" + String.valueOf(chunks.length).length() + "d/%0" + String.valueOf(chunks.length).length() + "d)\n", ((double) (i*100)/chunks.length), i, chunks.length);
+                chunks[i] = new Tiles.TileGraphics();
+                chunks[i].stitchBackgroundTexture(backgroundTiles[i]);
+                chunks[i].stitchTexture(tiles[i]);
+                chunks[i].textureLabel.setLocation(i* Tiles.TILE_WIDTH, 0);
+                chunks[i].redrawChunk(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(chunks[i].texture), 4, 4));
+            }
+            System.out.println("100.000% (" + chunks.length + "/" + chunks.length + ")");
+            System.out.println("Chunk texture stitching complete");
+            System.out.println("Completed in " + (int) ((System.nanoTime() - startTime1)*0.000001) + " Milliseconds");
+            if(Game.SAVE_MAP_AS_PHOTO){
+                System.out.println();
+                System.out.println("Saving textures as photo...");
+                saveChunkTexturesAsImage("output\\World Maps\\" + WORLD_RANDOM_SEED, chunks);
+            }
+        });
+
+        updateTextures.start();
+        gameBackgroundGeneration.start();
     }
 }

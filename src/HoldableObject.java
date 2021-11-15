@@ -4,7 +4,7 @@ import java.util.ArrayList;
 /**
  * A HoldableObject is an object that does not move, but can be stored in an inventory, used in crafting, or be interacted with in some other way.
  */
-public class HoldableObject {
+public class HoldableObject{
     /***/String displayName;
     /**The unscaled texture of the object.*/BufferedImage texture;
     /**The ItemID that identifies the object.*/ItemID itemID;
@@ -28,6 +28,29 @@ public class HoldableObject {
         texture = generateTexture(this.itemID);
     }
 
+    public void whenUsed(int x, int y, MovingObject usedBy){
+        int tileX = x/Tiles.TILE_WIDTH;
+        int tileY = y/Tiles.TILE_HEIGHT;
+        System.out.println("used item at x"+x+", y"+y);
+        switch(itemID){
+            case TILE_AIR, TILE_DIRT, TILE_DIRT_GRASS, TILE_STONE, TILE_COAL_ORE, TILE_IRON_ORE, TILE_GOLD_ORE, TILE_DIAMOND_ORE, TILE_STALAGMITE, TILE_STALACTITE, TILE_LOG, TILE_LEAVES, TILE_LEAFY_LOG, TILE_TREE_STARTER -> {
+                if(Game.tiles[tileX][tileY].itemID == ItemID.TILE_AIR && usedBy.nonSolidTiles.contains(this.itemID) || !usedBy.hitbox.intersects(Game.tiles[tileX][tileY].hitbox)){
+                    Tiles.Tile.placeTile(tileX, tileY, itemID, usedBy, false);
+                }
+            }
+            case ITEM_PINE_CONE -> {
+                //System.out.println("Used Pinecone");
+                if(tileY > 0 && (Game.tiles[tileX][tileY].itemID == ItemID.TILE_DIRT || Game.tiles[tileX][tileY].itemID == ItemID.TILE_DIRT_GRASS) && Game.tiles[tileX][tileY-1].itemID == ItemID.TILE_AIR){
+                    if(usedBy.inventory.removeFromInventory(new HoldableObject(ItemID.ITEM_PINE_CONE), 1) == 0){
+                        Tiles.Tile.placeTile(tileX, tileY-1, ItemID.TILE_TREE_STARTER, null, false);
+                    }
+                }
+            }
+        }
+    }
+
+    //TODO: Store both the base texture and the overlay texture as separate objects, so texture transitions can be done smoother.
+    //TODO: Make a whenUsed method here, use that for tile placing in the world.
     /**
      * Generates a texture for each unique ItemID, defaults to a null texture if the texture file or the ItemID cannot be found.
      * @param itemID The ItemID to generate a texture for.
@@ -164,6 +187,18 @@ public class HoldableObject {
                 }
                 finalImage = ImageProcessing.getImageFromResources(textureRandom.get((int) (Game.WORLD_RANDOM.nextDouble() * textureRandom.size())));
             }
+            case TILE_LOG -> {
+                finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/wood_log.png");
+            }
+            case TILE_LEAVES, TILE_TREE_STARTER -> {
+                finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/leaves.png");
+            }
+            case TILE_LEAFY_LOG -> {
+                finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/leafy_log.png");
+            }
+            case ITEM_PINE_CONE -> {
+                finalImage = ImageProcessing.getImageFromResources("textures/missingTexture.png");
+            }
             default -> finalImage = ImageProcessing.getImageFromResources("textures/missingTexture.png");
         }
         return finalImage;
@@ -203,6 +238,9 @@ public class HoldableObject {
             }
             case TILE_STALACTITE -> {
                 return "Stalactite";
+            }
+            case ITEM_PINE_CONE -> {
+                return "Pine Cone";
             }
             default -> {
                 return itemID.toString();

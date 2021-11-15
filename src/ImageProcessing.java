@@ -30,11 +30,12 @@ public class ImageProcessing{
     //USE SPARINGLY, excessive use leads to long loading times.
 
     /**
-     * Converts Image objects into BufferedImage objects.
+     * Converts Image objects into BufferedImage objects. Note that this does not copy over the Alpha channel.
      * @param inputImage The Image object to be converted.
      * @return Returns the BufferedImage version of the input image.
      */
     public static BufferedImage imageToBufferedImage(Image inputImage){
+        //TODO: Get the NULL_COLOR pixels from the original image to reset the alpha pixels, as one of these methods breaks the alpha value.
         BufferedImage newBufferedImage = new BufferedImage(inputImage.getWidth(null), inputImage.getHeight(null), 6);
         Graphics2D g2d = newBufferedImage.createGraphics();
         g2d.drawImage(inputImage, 0, 0, null);
@@ -179,11 +180,11 @@ public class ImageProcessing{
     /**
      * Scaled a BufferedImage up based on the scaleFactor.
      * @param inputBufferedImage The BufferedImage to be scaled.
-     * @param scaleFactor The factor of the original size to be the new scale.
+     * @param widthScaleFactor The factor of the original size to be the new horizontal scale.
+     * @param heightScaleFactor The factor of the original size to be the new vertical scale.
      * @return Returns a scaled up version of the input BufferedImage.
      */
     public static BufferedImage resizeImage(BufferedImage inputBufferedImage, int widthScaleFactor, int heightScaleFactor){
         return ImageProcessing.imageToBufferedImage(inputBufferedImage.getScaledInstance(inputBufferedImage.getWidth() * widthScaleFactor, inputBufferedImage.getHeight() * heightScaleFactor, Image.SCALE_REPLICATE));
-        //TODO: Get the NULL_COLOR pixels from the original image to reset the alpha pixels, as one of these methods breaks the alpha value.
     }
 }

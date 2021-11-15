@@ -43,8 +43,11 @@ public class InventoryManager {
             case TILE_STALACTITE -> {
                 return 50;
             }
+            case ITEM_PINE_CONE -> {
+                return 100;
+            }
         }
-        return -1;
+        return Integer.MAX_VALUE;
     }
 
     /**
@@ -310,6 +313,7 @@ public class InventoryManager {
      * Sorts the items in the inventory based on their position in ItemID.java, where items higher up are listed higher in the inventory.
      */
     public void sortInventory(){
+        //TODO: Implement Sorting algorithm for inventory
         //Use inventory[i].holdableObject.itemID.ordinal(); to get a numeric ID for each item.
         //Use quicksort or radix sort (ideally quicksort, easier to implement(?))
         //Switch to Insertion sort when sub-arrays are 7 elements or fewer.

@@ -1,7 +1,11 @@
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Player extends MovingObject implements KeyListener {
+public class Player extends MovingObject implements KeyListener, MouseListener {
     /***/public static final int PLAYER_WIDTH = 32;
     /***/public static final int PLAYER_HEIGHT = 48;
     /***/public static final double PLAYER_REACH = 256;
@@ -15,7 +19,9 @@ public class Player extends MovingObject implements KeyListener {
     @Override
     public void postInitialization(){
         Game.frame.addKeyListener(this);
-        this.inventory = new InventoryManager(10) {
+        Game.layeredPane.addMouseListener(this);
+        this.nonSolidTiles = new ArrayList<>(List.of(ItemID.TILE_AIR, ItemID.TILE_LOG, ItemID.TILE_LEAVES, ItemID.TILE_LEAFY_LOG, ItemID.TILE_TREE_STARTER));
+        this.inventory = new InventoryManager(15) {
             @Override
             public int addToInventory(HoldableObject holdableObject, int quantity) {
                 int result = super.addToInventory(holdableObject, quantity);
@@ -55,10 +61,18 @@ public class Player extends MovingObject implements KeyListener {
             public void configureMenuContents(){
                 this.menuDisplayContents = new String[menuContents.length];
                 for (int i = 0; i < this.menuDisplayContents.length; i++) {
-                    if(this.menuContents[i] == null || this.menuContents[i].holdableObject == null || this.menuContents[i].holdableObject.itemID == null){
-                        this.menuDisplayContents[i] = "[Empty]";
+                    if(i == selectedItem){
+                        if(this.menuContents[i] == null || this.menuContents[i].holdableObject == null || this.menuContents[i].holdableObject.itemID == null){
+                            this.menuDisplayContents[i] = "&gt[Empty]&lt";
+                        }else{
+                            this.menuDisplayContents[i] = "&gt[" + this.menuContents[i].holdableObject.displayName + " *" + this.menuContents[i].quantity + "]&lt";
+                        }
                     }else{
-                        this.menuDisplayContents[i] = "[" + this.menuContents[i].holdableObject.displayName + " *" + this.menuContents[i].quantity + "]";
+                        if(this.menuContents[i] == null || this.menuContents[i].holdableObject == null || this.menuContents[i].holdableObject.itemID == null){
+                            this.menuDisplayContents[i] = "&#8194[Empty]&#8194";
+                        }else{
+                            this.menuDisplayContents[i] = "&#8194[" + this.menuContents[i].holdableObject.displayName + " *" + this.menuContents[i].quantity + "]&#8194";
+                        }
                     }
                 }
                 this.fullMenuDisplayContents = "<html><body><u>" + menuTitle + "</u>";
@@ -67,13 +81,13 @@ public class Player extends MovingObject implements KeyListener {
                 }
                 this.fullMenuDisplayContents += "</body></html>";
                 this.menu.setText(fullMenuDisplayContents);
-                System.out.println(fullMenuDisplayContents);
             }
         };
-        this.inventoryMenu.setMenuTitle("Player Inventory");
-        inventoryMenu.setMenuContents(inventory.getInventory());
+        this.inventoryMenu.setMenuTitle("---Player Inventory---");
+        inventoryMenu.setMenuContents(inventory.getInventory(), 210);
         inventoryMenu.configureMenuContents();
         inventoryMenu.setVisibility(true);
+        inventory.addToInventory(new HoldableObject(ItemID.ITEM_PINE_CONE), 100);
     }
 
     /***/boolean upPressed;
@@ -88,7 +102,8 @@ public class Player extends MovingObject implements KeyListener {
     public void onUpdate() {
         this.calculateNewPosition();
         Game.moveCamera(x, y, width, height);
-        inventoryMenu.setPosition(-Game.screenX, -Game.screenY);
+        inventoryMenu.setMenuPosition(-Game.screenX, -Game.screenY);
+        //this.textureLabel.setIcon(new ImageIcon(ImageProcessing.resizeImage(ImageProcessing.rotateImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources("textures/missingTexture.png")), (int) (Game.MOVING_OBJECT_RANDOM.nextDouble() * 4)), 4, 4)));
     }
 
     //TODO: Fix dead stop on landing bug.
@@ -166,37 +181,6 @@ public class Player extends MovingObject implements KeyListener {
         confirmPosition();
     }
 
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        switch(e.getKeyCode()){
-            case 16, 17 -> this.sprintPressed = true;
-            case 37, 65 -> this.leftPressed = true;
-            case 38, 87, 32 -> this.upPressed = true;
-            case 39, 68 -> this.rightPressed = true;
-            case 40, 83 -> this.downPressed = true;
-        }
-    }
-
-
-    @Override
-    public void keyReleased(KeyEvent e) {
-        switch(e.getKeyCode()){
-            case 16, 17 -> this.sprintPressed = false;
-            case 37, 65 -> this.leftPressed = false;
-            case 38, 87, 32 -> this.upPressed = false;
-            case 39, 68 -> this.rightPressed = false;
-            case 40, 83 -> this.downPressed = false;
-            case 69 -> this.inventoryMenu.toggleVisibility();
-        }
-    }
-
-
     @Override
     public String toString(){
         String playerData = "Player Info: {";
@@ -229,5 +213,89 @@ public class Player extends MovingObject implements KeyListener {
 
         playerData += "}";
         return playerData;
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+    }
+
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        switch(e.getKeyCode()){
+            case 16, 17 -> this.sprintPressed = true;
+            case 37, 65 -> this.leftPressed = true;
+            case 38, 87, 32 -> this.upPressed = true;
+            case 39, 68 -> this.rightPressed = true;
+            case 40, 83 -> this.downPressed = true;
+        }
+    }
+
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        switch(e.getKeyCode()){
+            case 16, 17 -> this.sprintPressed = false;
+            case 37, 65 -> this.leftPressed = false;
+            case 38, 87, 32 -> this.upPressed = false;
+            case 39, 68 -> this.rightPressed = false;
+            case 40, 83 -> this.downPressed = false;
+            case 69 -> this.inventoryMenu.toggleVisibility();
+        }
+    }
+
+
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+        int x = e.getX();
+        int y = e.getY();
+        int tileX = x/Tiles.TILE_WIDTH;
+        int tileY = y/Tiles.TILE_HEIGHT;
+
+        int tileMiddleX = (tileX * Tiles.TILE_WIDTH) + (Tiles.TILE_WIDTH/2);
+        int tileMiddleY = (tileY * Tiles.TILE_HEIGHT) + (Tiles.TILE_HEIGHT/2);
+        int playerMiddleX = (int) this.x + (PLAYER_WIDTH/2);
+        int playerMiddleY = (int) this.y + (PLAYER_HEIGHT/2);
+        if(Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)) < PLAYER_REACH){
+            if(e.getButton() == 1){
+                if(Game.tiles[tileX][tileY].canBeBroken){
+                    Game.tiles[tileX][tileY].whenBroken(Game.tiles, tileX, tileY, this);
+                }
+            }else if(e.getButton() == 3){
+                if(this.inventoryMenu.selectedItem == -1){
+                    Game.tiles[tileX][tileY].whenUsed(Game.tiles, tileX, tileY);
+                }else{
+                    if(this.inventory.getInventorySlot(this.inventoryMenu.selectedItem) != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.itemID != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).quantity > 0){
+                        //TODO: Make sure tile being placed is touching another tile, OR that the background tile exists at that spot.
+                        this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.whenUsed(x, y, this);
+                        //Tiles.Tile.placeTile(tileX, tileY, this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.itemID, Game.player);
+                    }
+                }
+                //TODO: Disable manual random updates after testing.
+            }else if(e.getButton() == 2){
+                Game.tiles[tileX][tileY].onRandomUpdate(Game.tiles, tileX, tileY, true);
+            }
+        }
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseEntered(MouseEvent e) {
+
+    }
+
+    @Override
+    public void mouseExited(MouseEvent e) {
+
     }
 }
