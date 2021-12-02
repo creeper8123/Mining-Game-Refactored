@@ -25,34 +25,77 @@ public class Game{
     /**The size of the screen.*/protected static Dimension screenSize;
     /***/public static int screenX;
     /***/public static int screenY;
-    /**The list of currently active moving objects to update each game tick. The Player will always be the 1st object in the ArrayList.*/public static ArrayList<MovingObject> movingObjects = new ArrayList<>();
+    /**The list of currently active entities to update each game tick. The Player will always be the 1st object in the ArrayList.*/public static ArrayList<MovingObject> livingEntities = new ArrayList<>();
+    /**The list of currently active particles to update each game tick. The Player will always be the 1st object in the ArrayList.*/public static ArrayList<MovingObject> livingParticles = new ArrayList<>();
+    /**The list of currently active projectiles to update each game tick. The Player will always be the 1st object in the ArrayList.*/public static ArrayList<MovingObject> livingProjectiles = new ArrayList<>();
     /***/public static Player player;
     /**The number of tiles to randomly select per tick. The same tile can be selected multiple times.*/private static final int RANDOM_SELECTIONS_PER_CHUNK_PER_UPDATE = 1;
     /**The current iteration that the game is on. Updated as the final step of each tick*/public static long updateNum = 0;
     /**The flag to save all the chunk textures to a .png file.*/public static final boolean SAVE_MAP_AS_PHOTO = false;
+    public static long startTime = 0;
     /**The task that defines what happens in a game tick.*/public static TimerTask mainGameLoopTask = new TimerTask() {
         @Override
         public void run() {
             /*------------------------------------BEGIN MAIN LOOP------------------------------------*/
-            player.onUpdate();
-
-            for (int i = 0; i < movingObjects.size(); i++) {
-                int oldSize = movingObjects.size();
-                movingObjects.get(i).onUpdate(); //Do not replace with enhanced loop, deconstruction will throw a ConcurrentModificationExceptions
-                if(movingObjects.size() == oldSize-1){
-                    i--;
+            final long OVERLOAD_LIMIT = MILLISECONDS_PER_UPDATE * 10;
+            if(frame.hasFocus()){
+                //If system is overloaded, kill all particles
+                if(System.currentTimeMillis() - startTime > OVERLOAD_LIMIT && updateNum != 0){
+                    System.err.println("Project critically overloaded! " + ((System.currentTimeMillis() - startTime) - OVERLOAD_LIMIT) + " milliseconds past limit! Current limit: " + OVERLOAD_LIMIT + " Current Target: " + MILLISECONDS_PER_UPDATE);
+                    for (int i = livingParticles.size() - 1 ; i >= 0 ; i--) {
+                        livingParticles.get(i).deconstruct(true);
+                    }
                 }
-            }
+                startTime = System.currentTimeMillis();
 
-            //TODO: Move texture updates to a separate thread.
+                player.onUpdate();
 
-
-            //TODO: Restore random update functionality after testing.
-            for (int x = 0; x < tiles.length; x++) {
-                for (int i = 0; i < RANDOM_SELECTIONS_PER_CHUNK_PER_UPDATE; i++) {
-                    int y = (int) Math.floor(TICK_RANDOM.nextDouble() * tiles[x].length);
-                    tiles[x][y].onRandomUpdate(tiles, x, y, false);
+                //Updates for living entities
+                for (int i = 0 ; i < livingEntities.size(); i++) {
+                    int oldSize = livingEntities.size();
+                    livingEntities.get(i).onUpdate(); //Do not replace with enhanced loop, deconstruction will throw a ConcurrentModificationExceptions
+                    if(livingEntities.size() == oldSize-1){
+                        i--;
+                    }
                 }
+
+                //Updates for living projectiles
+                for (int i = 0 ; i < livingProjectiles.size(); i++) {
+                    int oldSize = livingProjectiles.size();
+                    livingProjectiles.get(i).onUpdate(); //Do not replace with enhanced loop, deconstruction will throw a ConcurrentModificationExceptions
+                    if(livingProjectiles.size() == oldSize-1){
+                        i--;
+                    }
+                }
+
+                //Updates for living particles
+                for (int i = 0 ; i < livingParticles.size(); i++) {
+                    int oldSize = livingParticles.size();
+                    livingParticles.get(i).onUpdate(); //Do not replace with enhanced loop, deconstruction will throw a ConcurrentModificationExceptions
+                    if(livingParticles.size() == oldSize-1){
+                        i--;
+                    }
+                }
+
+                //TODO: Move texture updates to a separate thread. Note: This causes texture artifacts
+                for (int x = 0; x < chunks.length; x++) {
+                    if(chunks[x] != null && chunks[x].yValues.size()>0){
+                        chunks[x].modifyChunk(x, chunks[x].yValues);
+                        for (int i = 0; i < chunks[x].yValues.size(); i++) {
+                            chunks[x].yValues.remove(i);
+                        }
+                    }
+                }
+
+                //TODO: Restore random update functionality after testing.
+                for (int x = 0; x < tiles.length; x++) {
+                    for (int i = 0; i < RANDOM_SELECTIONS_PER_CHUNK_PER_UPDATE; i++) {
+                        int y = (int) Math.floor(TICK_RANDOM.nextDouble() * tiles[x].length);
+                        tiles[x][y].onRandomUpdate(tiles, x, y, false);
+                    }
+                }
+            }else{
+                startTime = System.currentTimeMillis();
             }
 
             updateNum++;
@@ -198,19 +241,6 @@ public class Game{
         Game.mainGameLoop = new Timer();
         Game.mainGameLoop.scheduleAtFixedRate(mainGameLoopTask, 0, MILLISECONDS_PER_UPDATE);
 
-        Thread updateTextures = new Thread(() -> {
-            while(true){
-                for (int x = 0; x < chunks.length; x++) {
-                    if(chunks[x] != null && chunks[x].yValues.size()>0){
-                        chunks[x].modifyChunk(x, chunks[x].yValues);
-                        for (int i = 0; i < chunks[x].yValues.size(); i++) {
-                            chunks[x].yValues.remove(i);
-                        }
-                    }
-                }
-            }
-        });
-
 
         Thread gameBackgroundGeneration = new Thread(() -> {
             System.out.println();
@@ -233,8 +263,6 @@ public class Game{
                 saveChunkTexturesAsImage("output\\World Maps\\" + WORLD_RANDOM_SEED, chunks);
             }
         });
-
-        updateTextures.start();
         gameBackgroundGeneration.start();
     }
 }

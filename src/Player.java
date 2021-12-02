@@ -76,18 +76,26 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                     }
                 }
                 this.fullMenuDisplayContents = "<html><body><u>" + menuTitle + "</u>";
-                for (String menuDisplayContent : this.menuDisplayContents) {
+                for (String menuDisplayContent : this.menuDisplayContents)
                     this.fullMenuDisplayContents += "<br>" + menuDisplayContent;
-                }
+                this.fullMenuDisplayContents += "<br/><br/><br/>";
                 this.fullMenuDisplayContents += "</body></html>";
                 this.menu.setText(fullMenuDisplayContents);
             }
         };
         this.inventoryMenu.setMenuTitle("---Player Inventory---");
         inventoryMenu.setMenuContents(inventory.getInventory(), 210);
+        inventoryMenu.setMenuSize(inventoryMenu.menuWidth, inventoryMenu.menuHeight + 30);
+        inventoryMenu.addButton(0, inventoryMenu.menuHeight + 10, 20, inventoryMenu.menuWidth, "Delete Selected Item", () -> {
+            if(inventoryMenu.selectedItem >= 0){
+                if(inventory.getInventory() != null){
+                    inventory.setInventorySlot(inventoryMenu.selectedItem, null);
+                    inventoryMenu.configureMenuContents();
+                }
+            }
+        });
         inventoryMenu.configureMenuContents();
         inventoryMenu.setVisibility(true);
-        inventory.addToInventory(new HoldableObject(ItemID.ITEM_PINE_CONE), 100);
     }
 
     /***/boolean upPressed;
@@ -96,7 +104,8 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
     /***/boolean rightPressed;
     /***/boolean sprintPressed;
 
-    /***/MenuDisplay<InventoryManager.ItemStack> inventoryMenu;
+    /***/MenuDisplay<ItemStack> inventoryMenu;
+    /***/MenuDisplay<ItemStack> altMenu;
 
     @Override
     public void onUpdate() {
@@ -228,7 +237,9 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
             case 38, 87, 32 -> this.upPressed = true;
             case 39, 68 -> this.rightPressed = true;
             case 40, 83 -> this.downPressed = true;
+            case 84 -> Game.livingParticles.add(new Particle(x, y, 0, 16, 16, "textures/missingTexture.png", (Game.MOVING_OBJECT_RANDOM.nextDouble()*10)-5, (Game.MOVING_OBJECT_RANDOM.nextDouble()*10)-5, true, 2, true, 0.1));
         }
+        //System.out.println(e.getKeyChar() + " (" + e.getKeyCode() + ")" + " pressed");
     }
 
 
@@ -242,6 +253,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
             case 40, 83 -> this.downPressed = false;
             case 69 -> this.inventoryMenu.toggleVisibility();
         }
+        //System.out.println(e.getKeyChar() + " (" + e.getKeyCode() + ")" + " released");
     }
 
 
@@ -263,14 +275,13 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                     Game.tiles[tileX][tileY].whenBroken(Game.tiles, tileX, tileY, this);
                 }
             }else if(e.getButton() == 3){
-                if(this.inventoryMenu.selectedItem == -1){
-                    Game.tiles[tileX][tileY].whenUsed(Game.tiles, tileX, tileY);
-                }else{
+                if(this.inventoryMenu.selectedItem != -1 && !Game.tiles[tileX][tileY].whenUsed(Game.tiles, tileX, tileY)){
                     if(this.inventory.getInventorySlot(this.inventoryMenu.selectedItem) != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.itemID != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).quantity > 0){
-                        //TODO: Make sure tile being placed is touching another tile, OR that the background tile exists at that spot.
                         this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.whenUsed(x, y, this);
                         //Tiles.Tile.placeTile(tileX, tileY, this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.itemID, Game.player);
                     }
+                }else{
+                    System.out.println("Used tile at x" + tileX + " y" + tileY);
                 }
                 //TODO: Disable manual random updates after testing.
             }else if(e.getButton() == 2){

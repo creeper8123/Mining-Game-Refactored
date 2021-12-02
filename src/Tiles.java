@@ -167,6 +167,7 @@ public class Tiles {
                     workingImage = Game.tiles[x][y].texture;
                 }
 
+                //TODO: Fix this, Cannot invoke "java.awt.image.BufferedImage.getWidth()" because "workingImage" is null, because "chunkTexture" is null, java.lang.NullPointerException
                 for (int loopX = 0; loopX < workingImage.getWidth(); loopX++) {
                     for (int loopY = y * TILE_BASE_HEIGHT; loopY < workingImage.getHeight() + (y * TILE_BASE_HEIGHT); loopY++) {
                         Color myColour = new Color(workingImage.getRGB(loopX, loopY - (y * TILE_BASE_HEIGHT)));
@@ -188,7 +189,7 @@ public class Tiles {
 
         /***/public Rectangle hitbox;
         /***/public boolean canBeBroken;
-        /***/public ItemID dropItemID;
+        /***/public ItemID dropItemID; //TODO: make this an ArrayList of ItemStacks so that both more than one item can drop, and in different quantities.
 
         public Tile(int x, int y, int width, int height, ItemID itemID){
             super(itemID);
@@ -235,8 +236,9 @@ public class Tiles {
             texture = generateTexture(itemID);
         }
 
-        public void whenUsed(Tiles.Tile[][] tiles, int x, int y){
+        public boolean whenUsed(Tile[][] tiles, int x, int y){
             System.out.println("WARNING! Nothing Specified for " + this.itemID + " whenUsed at x" + x + ", y" + y);
+            return false;
         }
 
 
@@ -303,8 +305,9 @@ public class Tiles {
                     case TILE_AIR -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_AIR) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -332,8 +335,9 @@ public class Tiles {
                     case TILE_STONE -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_STONE) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -362,8 +366,9 @@ public class Tiles {
                         final double KILL_GRASS_THRESHOLD = 0.5;
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_DIRT_GRASS) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return true;
                             }
 
                             @Override
@@ -397,8 +402,9 @@ public class Tiles {
                         final double GROW_GRASS_THRESHOLD = 0.5;
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_DIRT) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -431,8 +437,9 @@ public class Tiles {
                     case TILE_COAL_ORE -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_COAL_ORE) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -460,8 +467,9 @@ public class Tiles {
                     case TILE_IRON_ORE -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_IRON_ORE) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -489,8 +497,9 @@ public class Tiles {
                     case TILE_GOLD_ORE -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_GOLD_ORE) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -518,8 +527,9 @@ public class Tiles {
                     case TILE_DIAMOND_ORE -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_DIAMOND_ORE) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -547,8 +557,9 @@ public class Tiles {
                     case TILE_STALACTITE -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_STALACTITE) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -566,7 +577,7 @@ public class Tiles {
                                 if (y > 0) {
                                     if (tiles[x][y - 1].itemID == ItemID.TILE_AIR && this.itemID != ItemID.TILE_AIR) {
                                         this.whenBroken(tiles, x, y, null);
-                                        Game.movingObjects.add(new FallingStalactite(x * TILE_WIDTH, y * TILE_HEIGHT, this.hitbox.width, this.hitbox.height, ImageProcessing.resizeImage(ImageProcessing.removeNullPixels(this.texture), 4, 4)));
+                                        Game.livingEntities.add(new FallingStalactite(x * TILE_WIDTH, y * TILE_HEIGHT, this.hitbox.width, this.hitbox.height, ImageProcessing.resizeImage(ImageProcessing.removeNullPixels(this.texture), 4, 4)));
                                     }
                                 }
                             }
@@ -583,8 +594,9 @@ public class Tiles {
                     case TILE_STALAGMITE -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_STALAGMITE) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -621,8 +633,9 @@ public class Tiles {
                         final double NEW_LEAF_THRESHOLD = 0.5;
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_LOG) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -747,7 +760,7 @@ public class Tiles {
                                             if(Game.TICK_RANDOM.nextDouble() > NEW_LEAF_THRESHOLD){
                                                 int newLeafX = x;
                                                 for (int i = 1 ; i <= newNumOfLeafyLogs ; i++) {
-                                                    if(tiles[x-i][newLeafY].itemID == ItemID.TILE_AIR){
+                                                    if(x-i >= 0 && x-i < tiles.length && tiles[x-i][newLeafY].itemID == ItemID.TILE_AIR){
                                                         newLeafX = x-i;
                                                         break;
                                                     }
@@ -775,13 +788,16 @@ public class Tiles {
                     case TILE_LEAVES -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_LEAVES) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
                             public void whenPlaced(Tile[][] tiles, int x, int y, MovingObject placedByEntity) {
                                 super.whenPlaced(tiles, x, y, placedByEntity);
+                                double randomDrop = Game.TICK_RANDOM.nextDouble();
+                                dropItemID = randomDrop >= 0.66666666 ? ItemID.ITEM_STICK : randomDrop < 0.1 ? ItemID.ITEM_PINE_CONE : null;
                             }
 
                             @Override
@@ -803,6 +819,7 @@ public class Tiles {
                                         killLeaf = false;
                                     }
                                 }
+
                                 //right
                                 newX = x;
                                 while(tiles[newX][y].itemID == ItemID.TILE_LEAVES && killLeaf){
@@ -830,13 +847,13 @@ public class Tiles {
                             }
                         };
                         finalTile.hasTransparency = true;
-                        finalTile.dropItemID = null;
                     }
                     case TILE_LEAFY_LOG -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_LEAFY_LOG) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -878,39 +895,12 @@ public class Tiles {
                         //finalTile.hasTransparency = true;
                         finalTile.dropItemID = ItemID.TILE_LEAFY_LOG;
                     }
-                    case ITEM_PINE_CONE -> {
-                        finalTile = new Tile(x, y, width, height, ItemID.ITEM_PINE_CONE) {
-                            @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
-                                //Do nothing
-                            }
-
-                            @Override
-                            public void whenPlaced(Tile[][] tiles, int x, int y, MovingObject placedByEntity) {
-                                super.whenPlaced(tiles, x, y, placedByEntity);
-                            }
-
-                            @Override
-                            public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                                super.whenBroken(tiles, x, y, brokenByEntity);
-                            }
-
-                            @Override
-                            public void onTileUpdate(Tile[][] tiles, int x, int y) {
-                                //Do nothing
-                            }
-
-                            @Override
-                            public void onRandomUpdate(Tile[][] tiles, int x, int y, boolean overrideRandomChance) {
-                                //Do nothing
-                            }
-                        };
-                    }
                     case TILE_TREE_STARTER -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_TREE_STARTER) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -942,8 +932,9 @@ public class Tiles {
                     default -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_AIR) {
                             @Override
-                            public void whenUsed(Tile[][] tiles, int x, int y) {
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
+                                return false;
                             }
 
                             @Override
@@ -1051,7 +1042,9 @@ public class Tiles {
                 System.out.println("Beginning Overworld ore generation...");
                 long startTime = System.nanoTime();
 
-                //TODO: fix ore dispersion at different levels, make only certain ores available at certain z levels
+                //TODO: Fix ore dispersion at different levels, make only certain ores available at certain z levels.
+                //TODO: Use only copper and tin in the overworld.
+                //TODO: Add copper and tin ore.
 
                 //To increase # of ore pockets, lower threshold and stretch values
                 PerlinNoise.Perlin2D perlin2D;

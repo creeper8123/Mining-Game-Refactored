@@ -7,8 +7,10 @@ import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 
 public class MenuDisplay<E> implements MouseListener, MouseWheelListener {
+    public static final int STANDARD_TEXT_HEIGHT_PIXELS = 15;
     public JLabel menu;
     public int menuWidth = 175;
+    public int menuHeight = 200;
     public Color backgroundColor = new Color(0, 0 ,0 , 127);
     public Color textColor = new Color(255, 255, 255, 255);
     public BufferedImage menuBackground = new BufferedImage(1, 1, 6);
@@ -17,48 +19,50 @@ public class MenuDisplay<E> implements MouseListener, MouseWheelListener {
     public String[] menuDisplayContents;
     public String fullMenuDisplayContents;
     public int selectedItem = -1;
+    public Font menuFont = new Font("Consolas", Font.PLAIN, 12);
 
     public MenuDisplay(){
-        menuBackground.setRGB(0, 0, backgroundColor.getRGB());
-
+        this.menuBackground.setRGB(0, 0, backgroundColor.getRGB());
         this.menu = new JLabel();
-
+        this.menu.setFocusable(false);
         this.menu.setBounds(0, 0, 1, 1);
 
         this.menu.setForeground(textColor);
         this.menu.setIcon(new ImageIcon(ImageProcessing.resizeImage(this.menuBackground, this.menu.getWidth(), this.menu.getHeight())));
         this.menu.setHorizontalTextPosition(JLabel.CENTER);
         this.menu.setVerticalTextPosition(JLabel.CENTER);
-        this.menu.setFont(new Font("Consolas", Font.PLAIN, 12));
+        this.menu.setFont(menuFont);
 
         Game.layeredPane.add(menu);
-        Game.layeredPane.setLayer(menu, ImageProcessing.MENU_LAYER);
+        Game.layeredPane.setLayer(menu, ImageProcessing.HUD_LAYER);
     }
 
     public void toggleVisibility(){
         setVisibility(!menu.isVisible());
     }
 
-    public void setVisibility(boolean aFlag){
-        if(aFlag){
+    public void setVisibility(boolean visibility){
+        if(visibility){
             menu.addMouseListener(this);
             menu.addMouseWheelListener(this);
         }else{
             menu.removeMouseListener(this);
             menu.removeMouseWheelListener(this);
         }
-        menu.setVisible(aFlag);
+        menu.setVisible(visibility);
     }
 
     public void setMenuContents(E[] newMenuContents) {
         menuContents = newMenuContents;
-        setMenuSize(menuWidth, (menuContents.length + 1) * 15);
+        this.menuHeight = (menuContents.length + 1) * STANDARD_TEXT_HEIGHT_PIXELS;
+        setMenuSize(menuWidth, menuHeight);
     }
 
     public void setMenuContents(E[] newMenuContents, int menuWidth) {
         this.menuWidth = menuWidth;
         menuContents = newMenuContents;
-        setMenuSize(menuWidth, (menuContents.length + 1) * 15);
+        this.menuHeight = (menuContents.length + 1) * STANDARD_TEXT_HEIGHT_PIXELS;
+        setMenuSize(menuWidth, menuHeight);
     }
 
     public void setMenuContents(int index, E newMenuContent) {
@@ -111,13 +115,30 @@ public class MenuDisplay<E> implements MouseListener, MouseWheelListener {
         this.menu.setIcon(new ImageIcon(ImageProcessing.resizeImage(menuBackground, width, height)));
     }
 
+    public void addButton(int buttonX, int buttonY, int buttonHeight, int buttonWidth, String contents, Runnable codeToRun){
+        JButton newButton = new JButton(contents);
+        newButton.setFocusable(false);
+        newButton.setFont(menuFont);
+        newButton.setHorizontalTextPosition(JLabel.CENTER);
+        newButton.setVerticalTextPosition(JLabel.CENTER);
+        newButton.setForeground(textColor);
+        newButton.setBounds(buttonX, buttonY, buttonWidth, buttonHeight);
+        newButton.setBackground(Color.BLACK);
+        newButton.addActionListener(e -> codeToRun.run());
+        menu.add(newButton);
+    }
+
+    public void deconstruct(boolean confirm){
+        if(confirm) Game.layeredPane.remove(menu);
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
         if(e.getButton() == 1){
-            int newSelectedItem = (e.getY()/15) -1;
+            int newSelectedItem = (e.getY()/STANDARD_TEXT_HEIGHT_PIXELS) -1;
             if(newSelectedItem == selectedItem){
                 selectedItem = -1;
-            }else{
+            }else if(selectedItem < menuContents.length-1){
                 selectedItem = newSelectedItem;
             }
             configureMenuContents();

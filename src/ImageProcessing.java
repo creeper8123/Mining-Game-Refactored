@@ -14,7 +14,8 @@ public class ImageProcessing{
 
     /***/public static final int TILE_LAYER = 2;
     /**The layer of the JLayeredPane that moving objects will be assigned to.*/static final int MOVING_OBJECT_LAYER = 3;
-    /***/public static final int MENU_LAYER = 4;
+    /***/public static final int HUD_LAYER = 5;
+    public static final int PARTICLE_LAYER = 4;
 
     /**
      * Retrieves a texture from the resources folder. Note that "resources/" is automatically added to the front of the filepath.
@@ -186,5 +187,30 @@ public class ImageProcessing{
      */
     public static BufferedImage resizeImage(BufferedImage inputBufferedImage, int widthScaleFactor, int heightScaleFactor){
         return ImageProcessing.imageToBufferedImage(inputBufferedImage.getScaledInstance(inputBufferedImage.getWidth() * widthScaleFactor, inputBufferedImage.getHeight() * heightScaleFactor, Image.SCALE_REPLICATE));
+    }
+
+    public static BufferedImage changeImageAlpha(BufferedImage inputBufferedImage, int newAlpha, boolean keepFullTransparencies){
+        assert newAlpha >= 0;
+        assert newAlpha < 256;
+        int a;// red component 0...255
+        int r;// = 255;// red component 0...255
+        int g;// = 0;// green component 0...255
+        int b;// = 0;// blue component 0...255
+        int col;// = ((a&0x0ff)<<24)|((r&0x0ff)<<16)|((g&0x0ff)<<8)|(b&0x0ff);
+        for (int x = 0; x < inputBufferedImage.getWidth(); x++) {
+            for (int y = 0; y < inputBufferedImage.getHeight(); y++) {
+                Color myColour = new Color(inputBufferedImage.getRGB(x, y));
+                a = newAlpha;
+                r = myColour.getRed();
+                g = myColour.getGreen();
+                b = myColour.getBlue();
+                if(keepFullTransparencies && myColour.getAlpha() == 0){
+                    a=0;
+                }
+                col = ((a&0x0ff)<<24)|((r&0x0ff)<<16)|((g&0x0ff)<<8)|(b&0x0ff);
+                inputBufferedImage.setRGB(x, y, col);
+            }
+        }
+        return inputBufferedImage;
     }
 }

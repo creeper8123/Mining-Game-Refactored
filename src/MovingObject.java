@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,12 +29,13 @@ public abstract class MovingObject {
 
         this.textureLabel = new JLabel();
         this.textureLabel.setBounds(hitbox);
-        this.textureLabel.setIcon(new ImageIcon(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources(textureLocation)), 4, 4)));
+        this.texture = ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources(textureLocation)), 4, 4);
+        this.textureLabel.setIcon(new ImageIcon(this.texture));
 
         postInitialization();
 
         Game.layeredPane.add(textureLabel);
-        Game.layeredPane.setLayer(textureLabel, ImageProcessing.MOVING_OBJECT_LAYER);
+        Game.layeredPane.setLayer(textureLabel, textureLayer);
     }
 
     /**
@@ -53,15 +55,36 @@ public abstract class MovingObject {
         this.height = height;
 
         this.hitbox = new Rectangle((int) Math.round(x), (int) Math.round(y), width, height);
+        this.texture = ImageProcessing.imageToBufferedImage(newTexture);
 
         this.textureLabel = new JLabel();
         this.textureLabel.setBounds(hitbox.x + textureXOffset, hitbox.y + textureYOffset, hitbox.width, hitbox.height);
-        this.textureLabel.setIcon(new ImageIcon(newTexture));
+        this.textureLabel.setIcon(new ImageIcon(this.texture));
 
         postInitialization();
 
         Game.layeredPane.add(textureLabel);
-        Game.layeredPane.setLayer(textureLabel, ImageProcessing.MOVING_OBJECT_LAYER);
+        Game.layeredPane.setLayer(textureLabel, textureLayer);
+    }
+
+    public MovingObject(double x, double y, int z, int width, int height, BufferedImage newTexture){
+        this.x = x;
+        this.y = y;
+
+        this.width = width;
+        this.height = height;
+
+        this.hitbox = new Rectangle((int) Math.round(x), (int) Math.round(y), width, height);
+
+        this.textureLabel = new JLabel();
+        this.textureLabel.setBounds(hitbox.x + textureXOffset, hitbox.y + textureYOffset, hitbox.width, hitbox.height);
+        this.texture = newTexture;
+        this.textureLabel.setIcon(new ImageIcon(this.texture));
+
+        postInitialization();
+
+        Game.layeredPane.add(textureLabel);
+        Game.layeredPane.setLayer(textureLabel, textureLayer);
     }
 
     //Default values, can be changed in objects extends MovingObject
@@ -78,6 +101,8 @@ public abstract class MovingObject {
     /**The JLabel object that is used for rendering.*/JLabel textureLabel;
     /**The number of pixels to shift the texture right (can be negative to shift left).*/int textureXOffset;
     /**The number of pixels to shift the texture down (can be negative to shift up).*/int textureYOffset;
+    BufferedImage texture;
+    int textureLayer = ImageProcessing.MOVING_OBJECT_LAYER;
 
     /**The flag for if the object is trying to move left.*/boolean left;
     /**The flag for if the object is trying to move right.*/boolean right;
@@ -339,7 +364,7 @@ public abstract class MovingObject {
         if(confirm){
             Game.layeredPane.remove(textureLabel);
             this.hitbox = null;
-            Game.movingObjects.remove(this);
+            Game.livingEntities.remove(this);
         }
     }
 

@@ -31,15 +31,13 @@ public class HoldableObject{
     public void whenUsed(int x, int y, MovingObject usedBy){
         int tileX = x/Tiles.TILE_WIDTH;
         int tileY = y/Tiles.TILE_HEIGHT;
-        System.out.println("used item at x"+x+", y"+y);
         switch(itemID){
             case TILE_AIR, TILE_DIRT, TILE_DIRT_GRASS, TILE_STONE, TILE_COAL_ORE, TILE_IRON_ORE, TILE_GOLD_ORE, TILE_DIAMOND_ORE, TILE_STALAGMITE, TILE_STALACTITE, TILE_LOG, TILE_LEAVES, TILE_LEAFY_LOG, TILE_TREE_STARTER -> {
-                if(Game.tiles[tileX][tileY].itemID == ItemID.TILE_AIR && usedBy.nonSolidTiles.contains(this.itemID) || !usedBy.hitbox.intersects(Game.tiles[tileX][tileY].hitbox)){
+                //if(Game.tiles[tileX][tileY].itemID == ItemID.TILE_AIR && usedBy.nonSolidTiles.contains(this.itemID) || !usedBy.hitbox.intersects(Game.tiles[tileX][tileY].hitbox)){
                     Tiles.Tile.placeTile(tileX, tileY, itemID, usedBy, false);
-                }
+                //}
             }
             case ITEM_PINE_CONE -> {
-                //System.out.println("Used Pinecone");
                 if(tileY > 0 && (Game.tiles[tileX][tileY].itemID == ItemID.TILE_DIRT || Game.tiles[tileX][tileY].itemID == ItemID.TILE_DIRT_GRASS) && Game.tiles[tileX][tileY-1].itemID == ItemID.TILE_AIR){
                     if(usedBy.inventory.removeFromInventory(new HoldableObject(ItemID.ITEM_PINE_CONE), 1) == 0){
                         Tiles.Tile.placeTile(tileX, tileY-1, ItemID.TILE_TREE_STARTER, null, false);
@@ -204,19 +202,35 @@ public class HoldableObject{
         return finalImage;
     }
 
+    /**
+     *
+     * @param itemID
+     * @return
+     */
+    public ItemStack[] getCraftingRecipe(ItemID itemID){
+        ItemStack[] items = new ItemStack[]{null, null, null, null, null};
+        switch (itemID){
+            case ITEM_PINE_CONE -> {
+                items[0] = new ItemStack(ItemID.TILE_DIRT, 3);
+                return items;
+            }
+            //TODO: Define crafting recipes. Where they are crafted will be specified on the tile they are crafted at.
+        }
+        return null;
+    }
+
+    /**
+     *
+     * @param itemID
+     * @return
+     */
     public String generateDisplayName(ItemID itemID){
         if(itemID == null){
-            return "Empty";
+            return null;
         }
         switch(itemID){
-            case TILE_AIR -> {
-                return "Air";
-            }
             case TILE_DIRT -> {
                 return "Dirt";
-            }
-            case TILE_DIRT_GRASS -> {
-                return "Grassy Dirt";
             }
             case TILE_STONE -> {
                 return "Stone";
@@ -233,14 +247,11 @@ public class HoldableObject{
             case TILE_DIAMOND_ORE -> {
                 return "Diamond Ore";
             }
-            case TILE_STALAGMITE -> {
-                return "Stalagmite";
-            }
-            case TILE_STALACTITE -> {
-                return "Stalactite";
-            }
             case ITEM_PINE_CONE -> {
                 return "Pine Cone";
+            }
+            case ITEM_STICK -> {
+                return "Stick";
             }
             default -> {
                 return itemID.toString();

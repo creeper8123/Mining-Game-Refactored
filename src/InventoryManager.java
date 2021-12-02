@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * InventoryManager creates an inventory consisting of slots, themselves consisting of an ItemID as an identifier, and a quantity. It also has several methods for interacting with the inventory.
@@ -13,17 +12,11 @@ public class InventoryManager {
      */
     protected static int getStackSize(ItemID itemID){
         switch(itemID){
-            case TILE_AIR -> {
-                return 5;
-            }
             case TILE_DIRT -> {
                 return 100;
             }
-            case TILE_DIRT_GRASS -> {
-                return 100;
-            }
             case TILE_STONE -> {
-                return 250;
+                return 100;
             }
             case TILE_COAL_ORE -> {
                 return 50;
@@ -37,45 +30,14 @@ public class InventoryManager {
             case TILE_DIAMOND_ORE -> {
                 return 25;
             }
-            case TILE_STALAGMITE -> {
-                return 50;
-            }
-            case TILE_STALACTITE -> {
-                return 50;
-            }
             case ITEM_PINE_CONE -> {
                 return 100;
             }
+            case ITEM_STICK -> {
+                return 125;
+            }
         }
         return Integer.MAX_VALUE;
-    }
-
-    /**
-     * A stack of a single type of ItemID, containing an ItemID and its current quantity.
-     */
-    public static class ItemStack {
-        /**The ItemID currently in the slot.*/ public HoldableObject holdableObject;
-        /**The number of items currently in the slot.*/public int quantity;
-
-        /**
-         * Initializes the ItemID with null, and the Quantity with null.
-         */
-        public ItemStack(){
-            holdableObject = null;
-            quantity = 0;
-        }
-
-        @Override
-        public String toString(){
-            String itemID;
-            if(holdableObject == null || holdableObject.itemID == null){
-                itemID = "null";
-            }else{
-                itemID = holdableObject.itemID.toString();
-            }
-
-            return "[" + itemID + " *" + quantity + "]";
-        }
     }
 
     /**A list of ItemStack objects.*/public ItemStack[] inventory;
@@ -325,7 +287,7 @@ public class InventoryManager {
      */
     private void resetEmptySlots(){
         for (int i = 0; i < inventory.length; i++) {
-            if(inventory[i].quantity <= 0){
+            if(inventory[i] == null || inventory[i].quantity <= 0){
                 inventory[i] = new ItemStack();
             }
         }
