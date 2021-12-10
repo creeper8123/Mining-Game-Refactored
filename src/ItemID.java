@@ -4,12 +4,13 @@
 
 /*
 When adding a new ItemID, needs to update:
-HoldableObject.generateTexture(itemID);     //Only if object can be placed
-HoldableObject.generateDisplayName(itemID); //Only if item is intended to be held.
-HoldableObject.getCraftingRecipe(itemID);   //Only if item can be crafted.
-InventoryManager.getStackSize(itemID);      //Only if item is intended to be held.
-Tiles.Tile.TilePresets.getTilePreset();     //For tiles only
-Tiles.WorldGeneration();                    //For tiles only, and only if naturally occurring.
+HoldableObject.generateTexture(itemID);                     //Only if object can be placed
+HoldableObject.generateDisplayName(itemID);                 //Only if item is intended to be held.
+HoldableObject.getCraftingRecipe(itemID);                   //Only if item can be crafted.
+HoldableObject.whenUsed(int x, int y, MovingObject usedBy); //Only if the item has a use (IE is not an intermediate crafting item)
+InventoryManager.getStackSize(itemID);                      //Only if item is intended to be held.
+Tiles.Tile.TilePresets.getTilePreset();                     //For tiles only
+Tiles.WorldGeneration();                                    //For tiles only, and only if naturally occurring.
  */
 public enum ItemID {
     /**The ID for an Air tile.*/TILE_AIR,
@@ -25,7 +26,9 @@ public enum ItemID {
     /***/ TILE_LOG,
     /***/ TILE_LEAVES,
     /***/ TILE_LEAFY_LOG,
+    TILE_WOOD,
     ITEM_PINE_CONE,
     TILE_TREE_STARTER,
-    ITEM_STICK //TODO: Need to add other code blocks
+    ITEM_STICK, //TODO: Need to add other code blocks
+    TILE_WORKBENCH
 }

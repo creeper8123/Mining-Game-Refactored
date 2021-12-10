@@ -12,7 +12,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
 
 
     public Player(double initialX, double initialY){
-        super(initialX, initialY, 0, PLAYER_WIDTH, PLAYER_HEIGHT, "textures/missingTexture.png");
+        super(initialX, initialY, 0, PLAYER_WIDTH, PLAYER_HEIGHT, ImageProcessing.removeNullPixels(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources("textures/entities/player.png")), 4, 4)));
     }
 
 
@@ -56,7 +56,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                 inventoryMenu.configureMenuContents();
             }
         };
-        this.inventoryMenu = new MenuDisplay<>(){
+        this.inventoryMenu = new MenuDisplay<>(0, 0){
             @Override
             public void configureMenuContents(){
                 this.menuDisplayContents = new String[menuContents.length];
@@ -78,24 +78,35 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                 this.fullMenuDisplayContents = "<html><body><u>" + menuTitle + "</u>";
                 for (String menuDisplayContent : this.menuDisplayContents)
                     this.fullMenuDisplayContents += "<br>" + menuDisplayContent;
-                this.fullMenuDisplayContents += "<br/><br/><br/>";
+                this.fullMenuDisplayContents += "<br/><br/><br/><br/>";
                 this.fullMenuDisplayContents += "</body></html>";
                 this.menu.setText(fullMenuDisplayContents);
             }
         };
         this.inventoryMenu.setMenuTitle("---Player Inventory---");
         inventoryMenu.setMenuContents(inventory.getInventory(), 210);
-        inventoryMenu.setMenuSize(inventoryMenu.menuWidth, inventoryMenu.menuHeight + 30);
-        inventoryMenu.addButton(0, inventoryMenu.menuHeight + 10, 20, inventoryMenu.menuWidth, "Delete Selected Item", () -> {
+        inventoryMenu.setMenuSize(inventoryMenu.menuWidth, inventoryMenu.menuHeight + 45);
+        inventoryMenu.addButton(0, inventoryMenu.menuHeight+5, 20, inventoryMenu.menuWidth, "Sort Inventory", () -> {
+            inventory.sortInventory();
+            inventoryMenu.configureMenuContents();
+        });
+        inventoryMenu.addButton(0, inventoryMenu.menuHeight+25, 20, inventoryMenu.menuWidth, "Delete Selected Item", () -> {
             if(inventoryMenu.selectedItem >= 0){
                 if(inventory.getInventory() != null){
                     inventory.setInventorySlot(inventoryMenu.selectedItem, null);
                     inventoryMenu.configureMenuContents();
+                    if(altMenu != null){
+                        altMenu.configureMenuContents();
+                    }
                 }
             }
         });
+        inventory.addToInventory(new HoldableObject(ItemID.TILE_WORKBENCH), 1);
         inventoryMenu.configureMenuContents();
-        inventoryMenu.setVisibility(true);
+        inventoryMenu.setVisibility(false);
+
+        altMenu = new MenuDisplay<>(300, 0);
+        altMenu.setVisibility(false);
     }
 
     /***/boolean upPressed;
@@ -107,12 +118,41 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
     /***/MenuDisplay<ItemStack> inventoryMenu;
     /***/MenuDisplay<ItemStack> altMenu;
 
+    public Integer altMenuTileX = null;
+    public Integer altMenuTileY = null;
+    public ItemID altMenuTileItemID = null;
+    public static ItemStack[] handCraftingItems = new ItemStack[]{new ItemStack(ItemID.TILE_WORKBENCH, 1), new ItemStack(ItemID.ITEM_PINE_CONE, 1)};
+
     @Override
     public void onUpdate() {
         this.calculateNewPosition();
         Game.moveCamera(x, y, width, height);
-        inventoryMenu.setMenuPosition(-Game.screenX, -Game.screenY);
+        inventoryMenu.setMenuPosition(-(Game.screenX), -(Game.screenY));
+        altMenu.setMenuPosition(-Game.screenX+300, -Game.screenY);
+
         //this.textureLabel.setIcon(new ImageIcon(ImageProcessing.resizeImage(ImageProcessing.rotateImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources("textures/missingTexture.png")), (int) (Game.MOVING_OBJECT_RANDOM.nextDouble() * 4)), 4, 4)));
+
+        if(altMenuTileItemID != null){
+            if(altMenuTileItemID != Game.tiles[altMenuTileX][altMenuTileY].itemID){
+                altMenuTileX = null;
+                altMenuTileY = null;
+                altMenuTileItemID = null;
+                InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
+            }else{
+                int tileMiddleX = (altMenuTileX * Tiles.TILE_WIDTH) + (Tiles.TILE_WIDTH/2);
+                int tileMiddleY = (altMenuTileY * Tiles.TILE_HEIGHT) + (Tiles.TILE_HEIGHT/2);
+                int playerMiddleX = (int) this.x + (PLAYER_WIDTH/2);
+                int playerMiddleY = (int) this.y + (PLAYER_HEIGHT/2);
+                //System.out.println("Tile Middle Pos: {" + tileMiddleX + "," + tileMiddleY + "}, Player Middle Pos: {" + playerMiddleX + "," + playerMiddleY + "}, Distance: " + Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)));
+                if(Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)) > PLAYER_REACH){
+                    //System.out.println("Too far from tile, " + Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)));
+                    altMenuTileX = null;
+                    altMenuTileY = null;
+                    altMenuTileItemID = null;
+                    InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
+                }
+            }
+        }
     }
 
     //TODO: Fix dead stop on landing bug.
@@ -238,6 +278,14 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
             case 39, 68 -> this.rightPressed = true;
             case 40, 83 -> this.downPressed = true;
             case 84 -> Game.livingParticles.add(new Particle(x, y, 0, 16, 16, "textures/missingTexture.png", (Game.MOVING_OBJECT_RANDOM.nextDouble()*10)-5, (Game.MOVING_OBJECT_RANDOM.nextDouble()*10)-5, true, 2, true, 0.1));
+            case 27 -> {
+                if(altMenuTileItemID != null){
+                    altMenuTileX = null;
+                    altMenuTileY = null;
+                    altMenuTileItemID = null;
+                }
+                InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
+            }
         }
         //System.out.println(e.getKeyChar() + " (" + e.getKeyCode() + ")" + " pressed");
     }
@@ -251,7 +299,10 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
             case 38, 87, 32 -> this.upPressed = false;
             case 39, 68 -> this.rightPressed = false;
             case 40, 83 -> this.downPressed = false;
-            case 69 -> this.inventoryMenu.toggleVisibility();
+            case 69 -> {
+                this.inventoryMenu.toggleVisibility();
+                this.altMenu.toggleVisibility();
+            }
         }
         //System.out.println(e.getKeyChar() + " (" + e.getKeyCode() + ")" + " released");
     }
@@ -275,15 +326,23 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                     Game.tiles[tileX][tileY].whenBroken(Game.tiles, tileX, tileY, this);
                 }
             }else if(e.getButton() == 3){
-                if(this.inventoryMenu.selectedItem != -1 && !Game.tiles[tileX][tileY].whenUsed(Game.tiles, tileX, tileY)){
+                if(!Game.tiles[tileX][tileY].whenUsed(Game.tiles, tileX, tileY) && this.inventoryMenu.selectedItem != -1){
                     if(this.inventory.getInventorySlot(this.inventoryMenu.selectedItem) != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.itemID != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).quantity > 0){
+                        System.out.println("Used held item " + this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.itemID +" at {x " + x + ", y " + y + "}");
                         this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.whenUsed(x, y, this);
-                        //Tiles.Tile.placeTile(tileX, tileY, this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.itemID, Game.player);
                     }
+                }else if(Game.tiles[tileX][tileY].itemID != ItemID.TILE_AIR){
+                    altMenuTileX = tileX;
+                    altMenuTileY = tileY;
+                    altMenuTileItemID = Game.tiles[tileX][tileY].itemID;
+                    System.out.println("Used tile " + Game.tiles[tileX][tileY].itemID +" at {tileX " + tileX + " (x " + x + ")," + " tileY " + tileY + " (y " + y + ")}");
                 }else{
-                    System.out.println("Used tile at x" + tileX + " y" + tileY);
+                    altMenuTileX = null;
+                    altMenuTileY = null;
+                    altMenuTileItemID = null;
+                    InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
                 }
-                //TODO: Disable manual random updates after testing.
+            //TODO: Disable manual random updates after testing.
             }else if(e.getButton() == 2){
                 Game.tiles[tileX][tileY].onRandomUpdate(Game.tiles, tileX, tileY, true);
             }
@@ -292,21 +351,21 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-
+        //Do nothing
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-
+        //Do nothing
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-
+        //Do nothing
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-
+        //Do nothing
     }
 }

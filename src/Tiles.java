@@ -62,9 +62,14 @@ public class Tiles {
                             for (int y = 0; y < TILE_BASE_HEIGHT; y++) {
                                 Color pixelColour = new Color(backgroundTexture.getRGB(x, y+(i * TILE_BASE_HEIGHT)));
                                 a = pixelColour.getAlpha();
-                                r = pixelColour.getRed()/2;
-                                g = pixelColour.getGreen()/2;
-                                b = pixelColour.getBlue()/2;
+                                r = pixelColour.getRed();
+                                g = pixelColour.getGreen();
+                                b = pixelColour.getBlue();
+                                if(a != ImageProcessing.SKY_COLOR.getAlpha() || r != ImageProcessing.SKY_COLOR.getRed() || g != ImageProcessing.SKY_COLOR.getGreen() || b != ImageProcessing.SKY_COLOR.getBlue()){
+                                    r /=2;
+                                    g /=2;
+                                    b /=2;
+                                }
                                 workingImage.setRGB(x, y, ((a&0x0ff)<<24)|((r&0x0ff)<<16)|((g&0x0ff)<<8)|(b&0x0ff));
                             }
                         }
@@ -167,6 +172,14 @@ public class Tiles {
                     workingImage = Game.tiles[x][y].texture;
                 }
 
+                if(Game.tiles[x][y].hasTransparency){
+                    BufferedImage backImage = Game.backgroundTiles[x][y].texture;
+                    if(Game.backgroundTiles[x][y].itemID != ItemID.TILE_AIR){
+                        backImage = ImageProcessing.changeBrightness(backImage, 0.5);
+                    }
+                    workingImage = ImageProcessing.overlayImage(backImage, workingImage);
+                }
+
                 //TODO: Fix this, Cannot invoke "java.awt.image.BufferedImage.getWidth()" because "workingImage" is null, because "chunkTexture" is null, java.lang.NullPointerException
                 for (int loopX = 0; loopX < workingImage.getWidth(); loopX++) {
                     for (int loopY = y * TILE_BASE_HEIGHT; loopY < workingImage.getHeight() + (y * TILE_BASE_HEIGHT); loopY++) {
@@ -180,6 +193,7 @@ public class Tiles {
                     }
                 }
             }
+
             this.texture = chunkTexture;
             redrawChunk(ImageProcessing.resizeImage(texture, 4, 4));
         }
@@ -199,7 +213,15 @@ public class Tiles {
         }
 
         public static boolean placeTile(int x, int y, ItemID itemID, MovingObject placedByEntity, boolean forcePlace){
-            boolean foundFoothold = forcePlace;
+            if(forcePlace){
+                Game.tiles[x][y] = Tiles.Tile.TilePresets.getTilePreset(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, itemID);
+                Game.tiles[x][y].whenPlaced(Game.tiles, x, y, placedByEntity);
+                return true;
+            }
+            if(Game.tiles[x][y].itemID != ItemID.TILE_AIR){
+                return false;
+            }
+            boolean foundFoothold = false;
             if(x > 0){
                 if(Game.tiles[x-1][y].itemID != ItemID.TILE_AIR && !foundFoothold){
                     foundFoothold = true;
@@ -296,11 +318,10 @@ public class Tiles {
          *
          */
         protected static class TilePresets{
-            private final int MAX_TREE_HEIGHT = 10;
-
+            private static final int TREE_MAX_HEIGHT = 12;
             public static Tile getTilePreset(int x, int y, int width, int height, ItemID tileID){
                 Tile finalTile;
-                final double TREE_GROWTH_THRESHOLD = 0.95;
+                final double TREE_GROWTH_THRESHOLD = 0.995;
                 switch (tileID) {
                     case TILE_AIR -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_AIR) {
@@ -368,7 +389,7 @@ public class Tiles {
                             @Override
                             public boolean whenUsed(Tile[][] tiles, int x, int y) {
                                 //Do nothing
-                                return true;
+                                return false;
                             }
 
                             @Override
@@ -629,7 +650,6 @@ public class Tiles {
                     }
                     case TILE_LOG -> {
                         final double LEAFY_LOGS_PER_NORMAL_LOG = 3;
-                        final int TREE_MAX_HEIGHT = 12;
                         final double NEW_LEAF_THRESHOLD = 0.5;
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_LOG) {
                             @Override
@@ -783,7 +803,7 @@ public class Tiles {
                                 }
                             }
                         };
-                        finalTile.dropItemID = ItemID.TILE_LOG;
+                        finalTile.dropItemID = ItemID.TILE_WOOD;
                     }
                     case TILE_LEAVES -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_LEAVES) {
@@ -893,7 +913,7 @@ public class Tiles {
                             }
                         };
                         //finalTile.hasTransparency = true;
-                        finalTile.dropItemID = ItemID.TILE_LEAFY_LOG;
+                        finalTile.dropItemID = ItemID.TILE_WOOD;
                     }
                     case TILE_TREE_STARTER -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_TREE_STARTER) {
@@ -921,13 +941,76 @@ public class Tiles {
                             @Override
                             public void onRandomUpdate(Tile[][] tiles, int x, int y, boolean overrideRandomChance) {
                                 if(Game.TICK_RANDOM.nextDouble() > TREE_GROWTH_THRESHOLD || overrideRandomChance){
-                                    Tile.placeTile(x, y, ItemID.TILE_LEAFY_LOG, null, false);
+                                    Tile.placeTile(x, y, ItemID.TILE_LEAFY_LOG, null, true);
                                     if(y > 0 && tiles[x][y-1].itemID == ItemID.TILE_AIR){
-                                        Tile.placeTile(x, y-1, ItemID.TILE_LEAVES, null, false);
+                                        Tile.placeTile(x, y-1, ItemID.TILE_LEAVES, null, true);
                                     }
                                 }
                             }
                         };
+                    }
+                    case TILE_WOOD -> {
+                        finalTile = new Tile(x, y, width, height, ItemID.TILE_WOOD) {
+                            @Override
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
+                                //Do nothing
+                                return false;
+                            }
+
+                            @Override
+                            public void whenPlaced(Tile[][] tiles, int x, int y, MovingObject placedByEntity) {
+                                super.whenPlaced(tiles, x, y, placedByEntity);
+                            }
+
+                            @Override
+                            public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                                super.whenBroken(tiles, x, y, brokenByEntity);
+                            }
+
+                            @Override
+                            public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                                //Do nothing
+                            }
+
+                            @Override
+                            public void onRandomUpdate(Tile[][] tiles, int x, int y, boolean overrideRandomChance) {
+                                //Do nothing
+                            }
+                        };
+                        finalTile.dropItemID = ItemID.TILE_WOOD;
+                    }
+                    case TILE_WORKBENCH -> {
+                        finalTile = new Tile(x, y, width, height, ItemID.TILE_WORKBENCH) {
+                            @Override
+                            public boolean whenUsed(Tile[][] tiles, int x, int y) {
+                                InventoryManager.createCraftingMenuInAltMenu("---Crafting (Workbench)---", new ItemStack[]{new ItemStack(ItemID.ITEM_PINE_CONE, 1), new ItemStack(ItemID.ITEM_PINE_CONE, 1), new ItemStack(ItemID.ITEM_PINE_CONE, 1), new ItemStack(ItemID.ITEM_PINE_CONE, 1), new ItemStack(ItemID.ITEM_PINE_CONE, 1), new ItemStack(ItemID.ITEM_PINE_CONE, 1)});
+                                return true;
+                            }
+
+                            @Override
+                            public void whenPlaced(Tile[][] tiles, int x, int y, MovingObject placedByEntity) {
+                                super.whenPlaced(tiles, x, y, placedByEntity);
+                            }
+
+                            @Override
+                            public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+                                super.whenBroken(tiles, x, y, brokenByEntity);
+                            }
+
+                            @Override
+                            public void onTileUpdate(Tile[][] tiles, int x, int y) {
+                                //Do nothing
+                            }
+
+                            @Override
+                            public void onRandomUpdate(Tile[][] tiles, int x, int y, boolean overrideRandomChance) {
+                                //Do nothing
+                            }
+                        };
+                        finalTile.hasTransparency = true;
+                        finalTile.dropItemID = ItemID.TILE_WORKBENCH;
+                        finalTile.hitbox.y += TILE_HEIGHT/2;
+                        finalTile.hitbox.height /= 2;
                     }
                     default -> {
                         finalTile = new Tile(x, y, width, height, ItemID.TILE_AIR) {
@@ -1168,12 +1251,15 @@ public class Tiles {
                 for (int x = 5 ; x < tiles.length-5 ; x++) {
                     for (int y = 0 ; y < tiles[x].length ; y++) {
                         if(tiles[x][y].itemID == ItemID.TILE_DIRT_GRASS && y > 0 && tiles[x][y-1].itemID == ItemID.TILE_AIR){
-                            tiles[x][y - 1] = Tile.TilePresets.getTilePreset(x * TILE_WIDTH, (y - 1) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_TREE_STARTER);
-                            for (int i = 0 ; i < (Game.WORLD_RANDOM.nextDouble() * 4) + 4 ; i++) {
-                                tiles[x][y-1].onRandomUpdate(tiles, x, y-1, true);
+                            if(Game.WORLD_RANDOM.nextDouble() < TREE_CHANCE){
+                                tiles[x][y - 1] = Tile.TilePresets.getTilePreset(x * TILE_WIDTH, (y - 1) * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_TREE_STARTER);
+                                tiles[x][y] = Tile.TilePresets.getTilePreset(x * TILE_WIDTH, y * TILE_HEIGHT, TILE_WIDTH, TILE_HEIGHT, ItemID.TILE_DIRT);
+                                for (int i = 0 ; i < (Game.WORLD_RANDOM.nextDouble() * 4) + 4 ; i++) {
+                                    tiles[x][y-1].onRandomUpdate(tiles, x, y-1, true);
+                                }
+                                x += 4;
+                                break;
                             }
-                            x += 10;
-                            break;
                         }
                     }
                 }

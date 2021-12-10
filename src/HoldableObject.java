@@ -21,21 +21,14 @@ public class HoldableObject{
         this.displayName = generateDisplayName(itemID);
     }
 
-    /**
-     * Generates a texture for each unique ItemID, defaults to a null texture if the texture file or the ItemID cannot be found&#46; Stores the texture in the objects 'texture' variable.
-     */
-    public void generateTexture(){
-        texture = generateTexture(this.itemID);
-    }
-
     public void whenUsed(int x, int y, MovingObject usedBy){
         int tileX = x/Tiles.TILE_WIDTH;
         int tileY = y/Tiles.TILE_HEIGHT;
         switch(itemID){
-            case TILE_AIR, TILE_DIRT, TILE_DIRT_GRASS, TILE_STONE, TILE_COAL_ORE, TILE_IRON_ORE, TILE_GOLD_ORE, TILE_DIAMOND_ORE, TILE_STALAGMITE, TILE_STALACTITE, TILE_LOG, TILE_LEAVES, TILE_LEAFY_LOG, TILE_TREE_STARTER -> {
-                //if(Game.tiles[tileX][tileY].itemID == ItemID.TILE_AIR && usedBy.nonSolidTiles.contains(this.itemID) || !usedBy.hitbox.intersects(Game.tiles[tileX][tileY].hitbox)){
+            case TILE_AIR, TILE_DIRT, TILE_DIRT_GRASS, TILE_STONE, TILE_COAL_ORE, TILE_IRON_ORE, TILE_GOLD_ORE, TILE_DIAMOND_ORE, TILE_STALAGMITE, TILE_STALACTITE, TILE_LOG, TILE_LEAVES, TILE_LEAFY_LOG, TILE_TREE_STARTER, TILE_WOOD ,TILE_WORKBENCH -> {
+                if(Game.tiles[tileX][tileY].itemID == ItemID.TILE_AIR && usedBy.nonSolidTiles.contains(this.itemID) || !usedBy.hitbox.intersects(Game.tiles[tileX][tileY].hitbox)){
                     Tiles.Tile.placeTile(tileX, tileY, itemID, usedBy, false);
-                //}
+                }
             }
             case ITEM_PINE_CONE -> {
                 if(tileY > 0 && (Game.tiles[tileX][tileY].itemID == ItemID.TILE_DIRT || Game.tiles[tileX][tileY].itemID == ItemID.TILE_DIRT_GRASS) && Game.tiles[tileX][tileY-1].itemID == ItemID.TILE_AIR){
@@ -185,18 +178,11 @@ public class HoldableObject{
                 }
                 finalImage = ImageProcessing.getImageFromResources(textureRandom.get((int) (Game.WORLD_RANDOM.nextDouble() * textureRandom.size())));
             }
-            case TILE_LOG -> {
-                finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/wood_log.png");
-            }
-            case TILE_LEAVES, TILE_TREE_STARTER -> {
-                finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/leaves.png");
-            }
-            case TILE_LEAFY_LOG -> {
-                finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/leafy_log.png");
-            }
-            case ITEM_PINE_CONE -> {
-                finalImage = ImageProcessing.getImageFromResources("textures/missingTexture.png");
-            }
+            case TILE_LOG -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/wood_log.png");
+            case TILE_LEAVES, TILE_TREE_STARTER -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/leaves.png");
+            case TILE_LEAFY_LOG -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/leafy_log.png");
+            case TILE_WOOD -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/wood_planks.png");
+            case TILE_WORKBENCH -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/workbench.png");
             default -> finalImage = ImageProcessing.getImageFromResources("textures/missingTexture.png");
         }
         return finalImage;
@@ -204,17 +190,20 @@ public class HoldableObject{
 
     /**
      *
-     * @param itemID
      * @return
      */
-    public ItemStack[] getCraftingRecipe(ItemID itemID){
+    public ItemStack[] getCraftingRecipe(){
         ItemStack[] items = new ItemStack[]{null, null, null, null, null};
         switch (itemID){
-            case ITEM_PINE_CONE -> {
-                items[0] = new ItemStack(ItemID.TILE_DIRT, 3);
+            case TILE_WORKBENCH -> {
+                items[0] = new ItemStack(ItemID.TILE_WOOD, 2);
+                items[1] = new ItemStack(ItemID.TILE_DIRT, 3);
                 return items;
             }
-            //TODO: Define crafting recipes. Where they are crafted will be specified on the tile they are crafted at.
+            case ITEM_PINE_CONE -> {
+                items[0] = new ItemStack(ItemID.ITEM_STICK, 3);
+                return items;
+            }
         }
         return null;
     }
@@ -252,6 +241,12 @@ public class HoldableObject{
             }
             case ITEM_STICK -> {
                 return "Stick";
+            }
+            case TILE_WOOD -> {
+                return "Wood";
+            }
+            case TILE_WORKBENCH -> {
+                return "Workbench";
             }
             default -> {
                 return itemID.toString();

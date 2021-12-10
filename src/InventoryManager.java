@@ -1,9 +1,11 @@
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * InventoryManager creates an inventory consisting of slots, themselves consisting of an ItemID as an identifier, and a quantity. It also has several methods for interacting with the inventory.
  */
 public class InventoryManager {
+
 
     /**
      * Defines and returns the stack size of each item in ItemID.java, returning -1 if the item is not in the list.
@@ -36,6 +38,12 @@ public class InventoryManager {
             case ITEM_STICK -> {
                 return 125;
             }
+            case TILE_WOOD -> {
+                return 75;
+            }
+            case TILE_WORKBENCH -> {
+                return 10;
+            }
         }
         return Integer.MAX_VALUE;
     }
@@ -52,6 +60,128 @@ public class InventoryManager {
         for (int i = 0; i < inventory.length; i++) {
             inventory[i] = new ItemStack();
         }
+    }
+
+    public static void createCraftingMenuInAltMenu(String title, ItemStack[] items){
+        AtomicInteger craftingQuantity = new AtomicInteger(1);
+        Game.player.altMenu.deconstruct(true);
+        Game.player.altMenu = new MenuDisplay<>(350, 50){
+            @Override
+            public void configureMenuContents(){
+                this.menuDisplayContents = new String[menuContents.length];
+                for (int i = 0; i < this.menuDisplayContents.length; i++) {
+                    if(i == selectedItem){
+                        if(this.menuContents[i] == null || this.menuContents[i].holdableObject == null || this.menuContents[i].holdableObject.itemID == null){
+                            this.menuDisplayContents[i] = "&gt[Empty]&lt";
+                        }else{
+                            this.menuDisplayContents[i] = "&gt[" + this.menuContents[i].holdableObject.displayName + " *" + this.menuContents[i].quantity + "]&lt";
+                        }
+                    }else{
+                        if(this.menuContents[i] == null || this.menuContents[i].holdableObject == null || this.menuContents[i].holdableObject.itemID == null){
+                            this.menuDisplayContents[i] = "&#8194[Empty]&#8194";
+                        }else{
+                            this.menuDisplayContents[i] = "&#8194[" + this.menuContents[i].holdableObject.displayName + " *" + this.menuContents[i].quantity + "]&#8194";
+                        }
+                    }
+                }
+                this.fullMenuDisplayContents = "<html><body><u>" + menuTitle + "</u>";
+                for (String menuDisplayContent : this.menuDisplayContents)
+                    this.fullMenuDisplayContents += "<br>" + menuDisplayContent;
+                this.fullMenuDisplayContents += "<br/><br/>"; //Add a <br/> for every line break
+                this.fullMenuDisplayContents += "<u>---Crafting Ingredients---</u>";
+                if(selectedItem > -1){
+                    ItemStack[] ingredients = items[selectedItem].holdableObject.getCraftingRecipe();
+                    if(ingredients != null){
+                        for (int i = 0 ; i < ingredients.length ; i++) {
+                            if(ingredients[i] == null){
+                                this.fullMenuDisplayContents += "<br>&#8194-----&#8194";
+                            }else{
+                                this.fullMenuDisplayContents += "<br>&#8194[" + ingredients[i].holdableObject.displayName + " *" + ingredients[i].quantity + "]&#8194";
+                            }
+                        }
+                    }else{
+                        for (int i = 0 ; i < 5 ; i++) {
+                            this.fullMenuDisplayContents += "<br>&#8194-----&#8194";
+                        }
+                    }
+                }else{
+                    for (int i = 0 ; i < 5 ; i++) {
+                        this.fullMenuDisplayContents += "<br>&#8194-----&#8194";
+                    }
+                }
+                this.fullMenuDisplayContents += "<br/><br/>Quantity: " + craftingQuantity;
+                this.fullMenuDisplayContents +="<br/><br/><br/><br/></body></html>";
+                this.menu.setText(fullMenuDisplayContents);
+            }
+        };
+        Game.player.altMenu.setMenuTitle(title);
+        Game.player.altMenu.setMenuContents(items);
+        Game.player.altMenu.setMenuSize(212, (Game.player.altMenu.menuContents.length + 13) * MenuDisplay.STANDARD_TEXT_HEIGHT_PIXELS);
+        Game.player.altMenu.configureMenuContents();
+        Game.player.altMenu.addButton(0, ((Game.player.altMenu.menuContents.length + 10) * MenuDisplay.STANDARD_TEXT_HEIGHT_PIXELS)+5, 20, 46, "--", () -> {
+            craftingQuantity.addAndGet(-10);
+            if(craftingQuantity.get() < 1){
+                craftingQuantity.set(1);
+            }
+            Game.player.altMenu.configureMenuContents();
+        });
+        Game.player.altMenu.addButton(46, ((Game.player.altMenu.menuContents.length + 10) * MenuDisplay.STANDARD_TEXT_HEIGHT_PIXELS)+5, 20, 40, "-", () -> {
+            craftingQuantity.addAndGet(-1);
+            if(craftingQuantity.get() < 1){
+                craftingQuantity.set(1);
+            }
+            Game.player.altMenu.configureMenuContents();
+        });
+        Game.player.altMenu.addButton(86, ((Game.player.altMenu.menuContents.length + 10) * MenuDisplay.STANDARD_TEXT_HEIGHT_PIXELS)+5, 20, 40, "1", () -> {
+            craftingQuantity.set(1);
+            Game.player.altMenu.configureMenuContents();
+        });
+        Game.player.altMenu.addButton(126, ((Game.player.altMenu.menuContents.length + 10) * MenuDisplay.STANDARD_TEXT_HEIGHT_PIXELS)+5, 20, 40, "+", () -> {
+            craftingQuantity.addAndGet(1);
+            if(craftingQuantity.get() < 1){
+                craftingQuantity.set(1);
+            }
+            Game.player.altMenu.configureMenuContents();
+        });
+        Game.player.altMenu.addButton(166, ((Game.player.altMenu.menuContents.length + 10) * MenuDisplay.STANDARD_TEXT_HEIGHT_PIXELS)+5, 20, 46, "++", () -> {
+            craftingQuantity.addAndGet(10);
+            if(craftingQuantity.get() < 1){
+                craftingQuantity.set(1);
+            }
+            Game.player.altMenu.configureMenuContents();
+        });
+        Game.player.altMenu.addButton(0, ((Game.player.altMenu.menuContents.length + 11) * MenuDisplay.STANDARD_TEXT_HEIGHT_PIXELS)+10, 20, 212, "Craft Selected Item", () -> {
+            if(Game.player.altMenu.selectedItem > -1){
+                boolean cancelCraft = false;
+                ItemStack itemToCraft = Game.player.altMenu.menuContents[Game.player.altMenu.selectedItem];
+                ItemStack[] craftingRecipe = itemToCraft.holdableObject.getCraftingRecipe();
+                for (int i = 0 ; i < craftingQuantity.get() ; i++) {
+                    for (int j = 0 ; j < craftingRecipe.length ; j++) {
+                        if(craftingRecipe[j] != null){
+                            if(Game.player.inventory.getQuantityInInventory(craftingRecipe[j].holdableObject) < craftingRecipe[j].quantity){
+                                cancelCraft = true;
+                                break;
+                            }
+                        }
+                    }
+                    if(!cancelCraft){
+                        int remainder = Game.player.inventory.addToInventory(itemToCraft.holdableObject, itemToCraft.quantity);
+                        if(remainder == 0){
+                            for (int j = 0 ; j < craftingRecipe.length ; j++) {
+                                if(craftingRecipe[j] != null){
+                                    Game.player.inventory.removeFromInventory(craftingRecipe[j].holdableObject, craftingRecipe[j].quantity);
+                                }
+                            }
+                        }else{
+                            Game.player.inventory.removeFromInventory(itemToCraft.holdableObject, itemToCraft.quantity - remainder);
+                        }
+                    }
+                }
+
+            }
+        });
+        Game.player.altMenu.setVisibility(true);
+        Game.player.inventoryMenu.setVisibility(true);
     }
 
     /**

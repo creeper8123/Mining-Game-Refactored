@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class Game{
     /**The number of milliseconds between ticks.*/public static final long MILLISECONDS_PER_UPDATE = 16;
-    /**The seed of the world, and all world related generation.*/public static final long WORLD_RANDOM_SEED = new Random().nextLong();//1537182761089763510L;//
+    /**The seed of the world, and all world related generation.*/public static final long WORLD_RANDOM_SEED = new Random().nextLong();
     /**The random number generator used for terrain and terrain texture generation.*/public static final Random WORLD_RANDOM = new Random(WORLD_RANDOM_SEED);
     public static final Random TICK_RANDOM = new Random();
     public static final Random MOVING_OBJECT_RANDOM = new Random();
@@ -29,6 +29,7 @@ public class Game{
     /**The list of currently active particles to update each game tick. The Player will always be the 1st object in the ArrayList.*/public static ArrayList<MovingObject> livingParticles = new ArrayList<>();
     /**The list of currently active projectiles to update each game tick. The Player will always be the 1st object in the ArrayList.*/public static ArrayList<MovingObject> livingProjectiles = new ArrayList<>();
     /***/public static Player player;
+    public static int playerSpawnX = 0;
     /**The number of tiles to randomly select per tick. The same tile can be selected multiple times.*/private static final int RANDOM_SELECTIONS_PER_CHUNK_PER_UPDATE = 1;
     /**The current iteration that the game is on. Updated as the final step of each tick*/public static long updateNum = 0;
     /**The flag to save all the chunk textures to a .png file.*/public static final boolean SAVE_MAP_AS_PHOTO = false;
@@ -40,11 +41,13 @@ public class Game{
             final long OVERLOAD_LIMIT = MILLISECONDS_PER_UPDATE * 10;
             if(frame.hasFocus()){
                 //If system is overloaded, kill all particles
-                if(System.currentTimeMillis() - startTime > OVERLOAD_LIMIT && updateNum != 0){
-                    System.err.println("Project critically overloaded! " + ((System.currentTimeMillis() - startTime) - OVERLOAD_LIMIT) + " milliseconds past limit! Current limit: " + OVERLOAD_LIMIT + " Current Target: " + MILLISECONDS_PER_UPDATE);
+                long currentTime = System.currentTimeMillis();
+                if(currentTime - startTime > OVERLOAD_LIMIT && updateNum != 0){
+                    System.err.println("Project critically overloaded! " + ((currentTime - startTime) - OVERLOAD_LIMIT) + " (" + (currentTime - startTime) + ") milliseconds past limit! Current limit: " + OVERLOAD_LIMIT + " Current Target: " + MILLISECONDS_PER_UPDATE);
                     for (int i = livingParticles.size() - 1 ; i >= 0 ; i--) {
                         livingParticles.get(i).deconstruct(true);
                     }
+                    layeredPane.repaint();
                 }
                 startTime = System.currentTimeMillis();
 
@@ -174,15 +177,17 @@ public class Game{
         System.out.println("Completed in " + (int) ((System.nanoTime() - startTime)*0.000001) + " Milliseconds");
         chunks = new Tiles.TileGraphics[tiles.length];
 
-        int playerSpawnX = 0;
+
         for (int y = 0; y < tiles[playerSpawnX].length; y++) {
             if(tiles[playerSpawnX][y].itemID != ItemID.TILE_AIR && tiles[playerSpawnX][y].itemID != ItemID.TILE_AIR){
                 player = new Player(playerSpawnX * Tiles.TILE_WIDTH, (y * Tiles.TILE_HEIGHT)-Player.PLAYER_HEIGHT);
+                InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", Player.handCraftingItems);
                 break;
             }
         }
 
         frame.setTitle("Underminer"); //TODO: Come up with, and add, a proper title.
+        //Maybe Midget Miner?
 
         startUpdating();
     }

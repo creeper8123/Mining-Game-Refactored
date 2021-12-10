@@ -1,3 +1,5 @@
+import org.w3c.dom.ls.LSOutput;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
@@ -5,6 +7,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
 
 public class MenuDisplay<E> implements MouseListener, MouseWheelListener {
     public static final int STANDARD_TEXT_HEIGHT_PIXELS = 15;
@@ -20,12 +23,13 @@ public class MenuDisplay<E> implements MouseListener, MouseWheelListener {
     public String fullMenuDisplayContents;
     public int selectedItem = -1;
     public Font menuFont = new Font("Consolas", Font.PLAIN, 12);
+    public Font buttonFont = new Font("Consolas", Font.PLAIN, 10);
 
-    public MenuDisplay(){
+    public MenuDisplay(int xPos, int yPos){
         this.menuBackground.setRGB(0, 0, backgroundColor.getRGB());
         this.menu = new JLabel();
         this.menu.setFocusable(false);
-        this.menu.setBounds(0, 0, 1, 1);
+        this.menu.setBounds(xPos, yPos, 1, 1);
 
         this.menu.setForeground(textColor);
         this.menu.setIcon(new ImageIcon(ImageProcessing.resizeImage(this.menuBackground, this.menu.getWidth(), this.menu.getHeight())));
@@ -35,6 +39,9 @@ public class MenuDisplay<E> implements MouseListener, MouseWheelListener {
 
         Game.layeredPane.add(menu);
         Game.layeredPane.setLayer(menu, ImageProcessing.HUD_LAYER);
+
+        menu.addMouseListener(this);
+        menu.addMouseWheelListener(this);
     }
 
     public void toggleVisibility(){
@@ -42,10 +49,10 @@ public class MenuDisplay<E> implements MouseListener, MouseWheelListener {
     }
 
     public void setVisibility(boolean visibility){
-        if(visibility){
+        if(!menu.isVisible() && visibility){
             menu.addMouseListener(this);
             menu.addMouseWheelListener(this);
-        }else{
+        }else if(menu.isVisible() && !visibility){
             menu.removeMouseListener(this);
             menu.removeMouseWheelListener(this);
         }
@@ -88,13 +95,17 @@ public class MenuDisplay<E> implements MouseListener, MouseWheelListener {
     public void configureMenuContents(){
         this.menuDisplayContents = new String[menuContents.length];
         for (int i = 0; i < this.menuDisplayContents.length; i++) {
-            if(this.menuContents[i] == null){
-                this.menuDisplayContents[i] = "[null]";
-            }else{
-                if(i == selectedItem){
-                    this.menuDisplayContents[i] = "&gt[" + this.menuContents[i].toString() + "]&lt";
+            if(i == selectedItem){
+                if(this.menuContents[i] == null){
+                    this.menuDisplayContents[i] = "&gt[null]&gt";
                 }else{
-                    this.menuDisplayContents[i] = "[" + this.menuContents[i].toString() + "]";
+                    this.menuDisplayContents[i] = "&gt" + this.menuContents[i].toString() + "&lt";
+                }
+            }else{
+                if(this.menuContents[i] == null){
+                    this.menuDisplayContents[i] = "&#8194[null]&#8194";
+                }else{
+                    this.menuDisplayContents[i] = "&#8194" + this.menuContents[i].toString() + "&#8194";
                 }
             }
         }
@@ -115,10 +126,10 @@ public class MenuDisplay<E> implements MouseListener, MouseWheelListener {
         this.menu.setIcon(new ImageIcon(ImageProcessing.resizeImage(menuBackground, width, height)));
     }
 
-    public void addButton(int buttonX, int buttonY, int buttonHeight, int buttonWidth, String contents, Runnable codeToRun){
-        JButton newButton = new JButton(contents);
+    public void addButton(int buttonX, int buttonY, int buttonHeight, int buttonWidth, String title, Runnable codeToRun){
+        JButton newButton = new JButton(title);
         newButton.setFocusable(false);
-        newButton.setFont(menuFont);
+        newButton.setFont(buttonFont);
         newButton.setHorizontalTextPosition(JLabel.CENTER);
         newButton.setVerticalTextPosition(JLabel.CENTER);
         newButton.setForeground(textColor);
@@ -129,16 +140,21 @@ public class MenuDisplay<E> implements MouseListener, MouseWheelListener {
     }
 
     public void deconstruct(boolean confirm){
-        if(confirm) Game.layeredPane.remove(menu);
+        if(confirm){
+            Game.layeredPane.remove(menu);
+            Game.layeredPane.repaint();
+            menu.removeMouseListener(this);
+            menu.removeMouseWheelListener(this);
+        }
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
         if(e.getButton() == 1){
-            int newSelectedItem = (e.getY()/STANDARD_TEXT_HEIGHT_PIXELS) -1;
+            int newSelectedItem = (e.getY()/STANDARD_TEXT_HEIGHT_PIXELS) - 1;
             if(newSelectedItem == selectedItem){
                 selectedItem = -1;
-            }else if(selectedItem < menuContents.length-1){
+            }else if(selectedItem < menuContents.length){
                 selectedItem = newSelectedItem;
             }
             configureMenuContents();
