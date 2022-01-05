@@ -12,7 +12,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
 
 
     public Player(double initialX, double initialY){
-        super(initialX, initialY, 0, PLAYER_WIDTH, PLAYER_HEIGHT, ImageProcessing.removeNullPixels(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources("textures/entities/player.png")), 4, 4)));
+        super(initialX, initialY, 0, PLAYER_WIDTH, PLAYER_HEIGHT, ImageProcessing.removeNullPixels(ImageProcessing.resizeImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources("textures/moving_objects/entities/player.png")), 4, 4)));
     }
 
 
@@ -101,7 +101,6 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                 }
             }
         });
-        inventory.addToInventory(new HoldableObject(ItemID.TILE_WORKBENCH), 1);
         inventoryMenu.configureMenuContents();
         inventoryMenu.setVisibility(false);
 
@@ -121,7 +120,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
     public Integer altMenuTileX = null;
     public Integer altMenuTileY = null;
     public ItemID altMenuTileItemID = null;
-    public static ItemStack[] handCraftingItems = new ItemStack[]{new ItemStack(ItemID.TILE_WORKBENCH, 1), new ItemStack(ItemID.ITEM_PINE_CONE, 1)};
+    public static ItemStack[] handCraftingItems = new ItemStack[]{new ItemStack(ItemID.TILE_WORKBENCH_L1, 1), new ItemStack(ItemID.ITEM_PINE_CONE, 1)};
 
     @Override
     public void onUpdate() {
@@ -139,8 +138,8 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                 altMenuTileItemID = null;
                 InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
             }else{
-                int tileMiddleX = (altMenuTileX * Tiles.TILE_WIDTH) + (Tiles.TILE_WIDTH/2);
-                int tileMiddleY = (altMenuTileY * Tiles.TILE_HEIGHT) + (Tiles.TILE_HEIGHT/2);
+                int tileMiddleX = (altMenuTileX * TileGraphics.TILE_WIDTH) + (TileGraphics.TILE_WIDTH/2);
+                int tileMiddleY = (altMenuTileY * TileGraphics.TILE_HEIGHT) + (TileGraphics.TILE_HEIGHT/2);
                 int playerMiddleX = (int) this.x + (PLAYER_WIDTH/2);
                 int playerMiddleY = (int) this.y + (PLAYER_HEIGHT/2);
                 //System.out.println("Tile Middle Pos: {" + tileMiddleX + "," + tileMiddleY + "}, Player Middle Pos: {" + playerMiddleX + "," + playerMiddleY + "}, Distance: " + Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)));
@@ -277,14 +276,14 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
             case 38, 87, 32 -> this.upPressed = true;
             case 39, 68 -> this.rightPressed = true;
             case 40, 83 -> this.downPressed = true;
-            case 84 -> Game.livingParticles.add(new Particle(x, y, 0, 16, 16, "textures/missingTexture.png", (Game.MOVING_OBJECT_RANDOM.nextDouble()*10)-5, (Game.MOVING_OBJECT_RANDOM.nextDouble()*10)-5, true, 2, true, 0.1));
+            case 84 -> Game.livingParticles.add(new Particle(x, y, 0, 16, 16, "textures/missingTexture.png", (Game.MOVING_OBJECT_RANDOM.nextDouble()*10)-5, (Game.MOVING_OBJECT_RANDOM.nextDouble()*10)-5, true, 2, true, 0.1, true));
             case 27 -> {
                 if(altMenuTileItemID != null){
                     altMenuTileX = null;
                     altMenuTileY = null;
                     altMenuTileItemID = null;
+                    InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
                 }
-                InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
             }
         }
         //System.out.println(e.getKeyChar() + " (" + e.getKeyCode() + ")" + " pressed");
@@ -293,6 +292,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
+        System.out.println(e.getKeyCode());
         switch(e.getKeyCode()){
             case 16, 17 -> this.sprintPressed = false;
             case 37, 65 -> this.leftPressed = false;
@@ -302,6 +302,10 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
             case 69 -> {
                 this.inventoryMenu.toggleVisibility();
                 this.altMenu.toggleVisibility();
+            }
+            case 82 -> {
+                this.x = 0;
+                this.y = 0;
             }
         }
         //System.out.println(e.getKeyChar() + " (" + e.getKeyCode() + ")" + " released");
@@ -313,11 +317,11 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
     public void mouseClicked(MouseEvent e) {
         int x = e.getX();
         int y = e.getY();
-        int tileX = x/Tiles.TILE_WIDTH;
-        int tileY = y/Tiles.TILE_HEIGHT;
+        int tileX = x/ TileGraphics.TILE_WIDTH;
+        int tileY = y/ TileGraphics.TILE_HEIGHT;
 
-        int tileMiddleX = (tileX * Tiles.TILE_WIDTH) + (Tiles.TILE_WIDTH/2);
-        int tileMiddleY = (tileY * Tiles.TILE_HEIGHT) + (Tiles.TILE_HEIGHT/2);
+        int tileMiddleX = (tileX * TileGraphics.TILE_WIDTH) + (TileGraphics.TILE_WIDTH/2);
+        int tileMiddleY = (tileY * TileGraphics.TILE_HEIGHT) + (TileGraphics.TILE_HEIGHT/2);
         int playerMiddleX = (int) this.x + (PLAYER_WIDTH/2);
         int playerMiddleY = (int) this.y + (PLAYER_HEIGHT/2);
         if(Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)) < PLAYER_REACH){
@@ -325,26 +329,20 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                 if(Game.tiles[tileX][tileY].canBeBroken){
                     Game.tiles[tileX][tileY].whenBroken(Game.tiles, tileX, tileY, this);
                 }
+            //TODO: Disable manual random updates after testing (remove all button 2 code).
+            }else if(e.getButton() == 2){
+                Game.tiles[tileX][tileY].onRandomUpdate(Game.tiles, tileX, tileY, true);
             }else if(e.getButton() == 3){
-                if(!Game.tiles[tileX][tileY].whenUsed(Game.tiles, tileX, tileY) && this.inventoryMenu.selectedItem != -1){
-                    if(this.inventory.getInventorySlot(this.inventoryMenu.selectedItem) != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.itemID != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).quantity > 0){
-                        System.out.println("Used held item " + this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.itemID +" at {x " + x + ", y " + y + "}");
-                        this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.whenUsed(x, y, this);
-                    }
-                }else if(Game.tiles[tileX][tileY].itemID != ItemID.TILE_AIR){
+                boolean tileHasAction = Game.tiles[tileX][tileY].whenUsed(Game.tiles, tileX, tileY);
+                if(!tileHasAction && this.inventoryMenu.selectedItem != -1 && (this.inventory.getInventorySlot(this.inventoryMenu.selectedItem) != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.itemID != null && this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).quantity > 0)){
+                    System.out.println("Used held item " + this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.itemID + " at {tileX " + tileX + " (x " + x + ")," + " tileY " + tileY + " (y " + y + ")}");
+                    this.inventory.getInventorySlot(this.inventoryMenu.selectedItem).holdableObject.whenUsed(x, y, this);
+                }else if(tileHasAction){
+                    System.out.println("Used tile " + Game.tiles[tileX][tileY].itemID + " at {tileX " + tileX + " (x " + x + ")," + " tileY " + tileY + " (y " + y + ")}");
                     altMenuTileX = tileX;
                     altMenuTileY = tileY;
                     altMenuTileItemID = Game.tiles[tileX][tileY].itemID;
-                    System.out.println("Used tile " + Game.tiles[tileX][tileY].itemID +" at {tileX " + tileX + " (x " + x + ")," + " tileY " + tileY + " (y " + y + ")}");
-                }else{
-                    altMenuTileX = null;
-                    altMenuTileY = null;
-                    altMenuTileItemID = null;
-                    InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
                 }
-            //TODO: Disable manual random updates after testing.
-            }else if(e.getButton() == 2){
-                Game.tiles[tileX][tileY].onRandomUpdate(Game.tiles, tileX, tileY, true);
             }
         }
     }

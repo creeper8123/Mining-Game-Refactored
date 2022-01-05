@@ -122,7 +122,7 @@ public class PerlinNoise{
 
         //Connect a curved line  flattening at the points, and get the value at that location
         public double cosInterpolation(double x, double y, double z){
-            while(z+60 > per2D.size()){
+            while(z+1 > per2D.size()){
                 per2D.add(new Perlin2D(random.nextLong()));
             }
             double low = per2D.get((int) Math.floor(z)).cosInterpolation(x, y);

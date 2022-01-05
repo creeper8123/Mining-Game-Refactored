@@ -22,18 +22,18 @@ public class HoldableObject{
     }
 
     public void whenUsed(int x, int y, MovingObject usedBy){
-        int tileX = x/Tiles.TILE_WIDTH;
-        int tileY = y/Tiles.TILE_HEIGHT;
+        int tileX = x/ TileGraphics.TILE_WIDTH;
+        int tileY = y/ TileGraphics.TILE_HEIGHT;
         switch(itemID){
-            case TILE_AIR, TILE_DIRT, TILE_DIRT_GRASS, TILE_STONE, TILE_COAL_ORE, TILE_IRON_ORE, TILE_GOLD_ORE, TILE_DIAMOND_ORE, TILE_STALAGMITE, TILE_STALACTITE, TILE_LOG, TILE_LEAVES, TILE_LEAFY_LOG, TILE_TREE_STARTER, TILE_WOOD ,TILE_WORKBENCH -> {
+            case TILE_AIR, TILE_DIRT, TILE_DIRT_GRASS, TILE_STONE, TILE_COAL_ORE, TILE_COPPER_ORE, TILE_TIN_ORE, TILE_IRON_ORE, TILE_GOLD_ORE, TILE_DIAMOND_ORE, TILE_STALAGMITE, TILE_STALACTITE, TILE_LOG, TILE_LEAVES, TILE_LEAFY_LOG, TILE_TREE_STARTER, TILE_WOOD , TILE_WORKBENCH_L1, TILE_FURNACE_L1 -> {
                 if(Game.tiles[tileX][tileY].itemID == ItemID.TILE_AIR && usedBy.nonSolidTiles.contains(this.itemID) || !usedBy.hitbox.intersects(Game.tiles[tileX][tileY].hitbox)){
-                    Tiles.Tile.placeTile(tileX, tileY, itemID, usedBy, false);
+                    Tile.placeTile(tileX, tileY, itemID, usedBy, false);
                 }
             }
             case ITEM_PINE_CONE -> {
                 if(tileY > 0 && (Game.tiles[tileX][tileY].itemID == ItemID.TILE_DIRT || Game.tiles[tileX][tileY].itemID == ItemID.TILE_DIRT_GRASS) && Game.tiles[tileX][tileY-1].itemID == ItemID.TILE_AIR){
                     if(usedBy.inventory.removeFromInventory(new HoldableObject(ItemID.ITEM_PINE_CONE), 1) == 0){
-                        Tiles.Tile.placeTile(tileX, tileY-1, ItemID.TILE_TREE_STARTER, null, false);
+                        Tile.placeTile(tileX, tileY-1, ItemID.TILE_TREE_STARTER, null, false);
                     }
                 }
             }
@@ -51,14 +51,14 @@ public class HoldableObject{
         BufferedImage finalImage;
         switch(itemID){
             case TILE_AIR -> {
-                BufferedImage newImage = ImageProcessing.bufferedImageToImage(new BufferedImage(Tiles.TILE_BASE_WIDTH, Tiles.TILE_BASE_HEIGHT, 6));
+                BufferedImage newImage = ImageProcessing.bufferedImageToImage(new BufferedImage(TileGraphics.TILE_BASE_WIDTH, TileGraphics.TILE_BASE_HEIGHT, 6));
                 int a;// red component 0...255
                 int r;// = 255;// red component 0...255
                 int g;// = 0;// green component 0...255
                 int b;// = 0;// blue component 0...255
                 int col;// = ((a&0x0ff)<<24)|((r&0x0ff)<<16)|((g&0x0ff)<<8)|(b&0x0ff);
-                for (int x = 0; x < Tiles.TILE_BASE_WIDTH; x++) {
-                    for (int y = 0; y < Tiles.TILE_BASE_HEIGHT; y++) {
+                for (int x = 0 ; x < TileGraphics.TILE_BASE_WIDTH; x++) {
+                    for (int y = 0 ; y < TileGraphics.TILE_BASE_HEIGHT; y++) {
                         a = ImageProcessing.SKY_COLOR.getAlpha();
                         r = ImageProcessing.SKY_COLOR.getRed();
                         g = ImageProcessing.SKY_COLOR.getGreen();
@@ -113,6 +113,36 @@ public class HoldableObject{
                 final ArrayList<String> coalRandom = new ArrayList<>();
                 for (int i = 0; i < 5; i++) {
                     coalRandom.add("textures/tiles/tileOverlays/coalOre/coalOre" + i + ".png");
+                }
+
+                BufferedImage baseStoneTexture = ImageProcessing.rotateImage(ImageProcessing.getImageFromResources(stoneRandom.get((int) (Game.WORLD_RANDOM.nextDouble() * stoneRandom.size()))), (int) (Game.WORLD_RANDOM.nextDouble() * 4));
+                BufferedImage baseCoalTexture = ImageProcessing.rotateImage(ImageProcessing.getImageFromResources(coalRandom.get((int) (Game.WORLD_RANDOM.nextDouble() * coalRandom.size()))), (int) (Game.WORLD_RANDOM.nextDouble() * 4));
+                finalImage = ImageProcessing.overlayImage(baseStoneTexture, baseCoalTexture);
+            }
+            case TILE_COPPER_ORE -> {
+                final ArrayList<String> stoneRandom = new ArrayList<>();
+                for (int i = 0; i < 5; i++) {
+                    stoneRandom.add("textures/tiles/fullTiles/stone/stone" + i + ".png");
+                }
+
+                final ArrayList<String> coalRandom = new ArrayList<>();
+                for (int i = 0; i < 5; i++) {
+                    coalRandom.add("textures/tiles/tileOverlays/copperOre/copperOre" + i + ".png");
+                }
+
+                BufferedImage baseStoneTexture = ImageProcessing.rotateImage(ImageProcessing.getImageFromResources(stoneRandom.get((int) (Game.WORLD_RANDOM.nextDouble() * stoneRandom.size()))), (int) (Game.WORLD_RANDOM.nextDouble() * 4));
+                BufferedImage baseCoalTexture = ImageProcessing.rotateImage(ImageProcessing.getImageFromResources(coalRandom.get((int) (Game.WORLD_RANDOM.nextDouble() * coalRandom.size()))), (int) (Game.WORLD_RANDOM.nextDouble() * 4));
+                finalImage = ImageProcessing.overlayImage(baseStoneTexture, baseCoalTexture);
+            }
+            case TILE_TIN_ORE -> {
+                final ArrayList<String> stoneRandom = new ArrayList<>();
+                for (int i = 0; i < 5; i++) {
+                    stoneRandom.add("textures/tiles/fullTiles/stone/stone" + i + ".png");
+                }
+
+                final ArrayList<String> coalRandom = new ArrayList<>();
+                for (int i = 0; i < 5; i++) {
+                    coalRandom.add("textures/tiles/tileOverlays/tinOre/tinOre" + i + ".png");
                 }
 
                 BufferedImage baseStoneTexture = ImageProcessing.rotateImage(ImageProcessing.getImageFromResources(stoneRandom.get((int) (Game.WORLD_RANDOM.nextDouble() * stoneRandom.size()))), (int) (Game.WORLD_RANDOM.nextDouble() * 4));
@@ -182,7 +212,8 @@ public class HoldableObject{
             case TILE_LEAVES, TILE_TREE_STARTER -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/leaves.png");
             case TILE_LEAFY_LOG -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/leafy_log.png");
             case TILE_WOOD -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/wood_planks.png");
-            case TILE_WORKBENCH -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/workbench.png");
+            case TILE_WORKBENCH_L1 -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/workstations/workbench.png");
+            case TILE_FURNACE_L1 -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/workstations/furnace.png");
             default -> finalImage = ImageProcessing.getImageFromResources("textures/missingTexture.png");
         }
         return finalImage;
@@ -195,13 +226,19 @@ public class HoldableObject{
     public ItemStack[] getCraftingRecipe(){
         ItemStack[] items = new ItemStack[]{null, null, null, null, null};
         switch (itemID){
-            case TILE_WORKBENCH -> {
+            case TILE_WORKBENCH_L1 -> {
                 items[0] = new ItemStack(ItemID.TILE_WOOD, 2);
                 items[1] = new ItemStack(ItemID.TILE_DIRT, 3);
                 return items;
             }
             case ITEM_PINE_CONE -> {
                 items[0] = new ItemStack(ItemID.ITEM_STICK, 3);
+                return items;
+            }
+            case TILE_FURNACE_L1 -> {
+                items[0] = new ItemStack(ItemID.TILE_WOOD, 3);
+                items[1] = new ItemStack(ItemID.TILE_STONE, 10);
+                items[2] = new ItemStack(ItemID.TILE_COAL_ORE, 2);
                 return items;
             }
         }
@@ -227,6 +264,12 @@ public class HoldableObject{
             case TILE_COAL_ORE -> {
                 return "Coal Ore";
             }
+            case TILE_COPPER_ORE -> {
+                return "Copper Ore";
+            }
+            case TILE_TIN_ORE -> {
+                return "Tin Ore";
+            }
             case TILE_IRON_ORE -> {
                 return "Iron Ore";
             }
@@ -245,8 +288,11 @@ public class HoldableObject{
             case TILE_WOOD -> {
                 return "Wood";
             }
-            case TILE_WORKBENCH -> {
-                return "Workbench";
+            case TILE_WORKBENCH_L1 -> {
+                return "Workbench Lv1";
+            }
+            case TILE_FURNACE_L1 -> {
+                return "Furnace Lv1";
             }
             default -> {
                 return itemID.toString();

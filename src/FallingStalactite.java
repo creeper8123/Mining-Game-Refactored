@@ -37,7 +37,7 @@ public class FallingStalactite extends MovingObject{
         this.textureXOffset = -20;
         this.hitbox = new Rectangle(hitbox.x - textureXOffset, hitbox.y - textureYOffset, hitbox.width, hitbox.height);
         this.x -= textureXOffset;
-        this.textureLabel.setBounds(hitbox.x + textureXOffset, hitbox.y + textureYOffset, Tiles.TILE_WIDTH, Tiles.TILE_HEIGHT);
+        this.textureLabel.setBounds(hitbox.x + textureXOffset, hitbox.y + textureYOffset, TileGraphics.TILE_WIDTH, TileGraphics.TILE_HEIGHT);
     }
 
 

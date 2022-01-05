@@ -23,6 +23,12 @@ public class InventoryManager {
             case TILE_COAL_ORE -> {
                 return 50;
             }
+            case TILE_COPPER_ORE -> {
+                return 50;
+            }
+            case TILE_TIN_ORE -> {
+                return 50;
+            }
             case TILE_IRON_ORE -> {
                 return 50;
             }
@@ -41,8 +47,11 @@ public class InventoryManager {
             case TILE_WOOD -> {
                 return 75;
             }
-            case TILE_WORKBENCH -> {
-                return 10;
+            case TILE_WORKBENCH_L1 -> {
+                return 5;
+            }
+            case TILE_FURNACE_L1 -> {
+                return 2;
             }
         }
         return Integer.MAX_VALUE;

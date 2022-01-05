@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
 
 //TODO: Make method that flips image on an axis.
 /**
@@ -23,13 +24,17 @@ public class ImageProcessing{
      * @return Returns a BufferedImage of the desired texture.
      */
     public static BufferedImage getImageFromResources(String filepath) {
-        return imageToBufferedImage(new ImageIcon("resources/" + filepath).getImage());
+        try{
+            return imageToBufferedImage(new ImageIcon("resources/" + filepath).getImage());
+        }catch(Exception exception){
+            System.err.println("Warning! Texture " + "[resources/" + filepath + "] not found! Defaulting to [resources/textures/missingTexture.png].");
+            return imageToBufferedImage(new ImageIcon("resources/textures/missingTexture.png").getImage());
+        }
     }
 
 
     //TODO: Find a more efficient imageToBufferedImage method
     //USE SPARINGLY, excessive use leads to long loading times.
-
     /**
      * Converts Image objects into BufferedImage objects. Note that this does not copy over the Alpha channel.
      * @param inputImage The Image object to be converted.
@@ -199,12 +204,12 @@ public class ImageProcessing{
         int col;// = ((a&0x0ff)<<24)|((r&0x0ff)<<16)|((g&0x0ff)<<8)|(b&0x0ff);
         for (int x = 0; x < inputBufferedImage.getWidth(); x++) {
             for (int y = 0; y < inputBufferedImage.getHeight(); y++) {
-                Color myColour = new Color(inputBufferedImage.getRGB(x, y));
+                Color myColour = new Color(inputBufferedImage.getRGB(x, y), true);
                 a = newAlpha;
                 r = myColour.getRed();
                 g = myColour.getGreen();
                 b = myColour.getBlue();
-                if(keepFullTransparencies && myColour.getAlpha() == 0){
+                if(keepFullTransparencies && myColour.getAlpha() <= 0){
                     a=0;
                 }
                 col = ((a&0x0ff)<<24)|((r&0x0ff)<<16)|((g&0x0ff)<<8)|(b&0x0ff);
