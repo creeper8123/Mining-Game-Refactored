@@ -1,4 +1,9 @@
+package AllClasses;
+
+import UniqueIDs.ItemID;
+
 import java.awt.*;
+import java.util.ArrayList;
 
 class Tile extends HoldableObject {
 
@@ -7,7 +12,7 @@ class Tile extends HoldableObject {
     /***/
     public boolean canBeBroken;
     /***/
-    public ItemID dropItemID; //TODO: make this an ArrayList of ItemStacks so that both more than one item can drop, and in different quantities.
+    public ArrayList<ItemStack> droppedItemStacks = new ArrayList<>();
 
     public Tile(int x, int y, int width, int height, ItemID itemID) {
         super(itemID);
@@ -80,16 +85,16 @@ class Tile extends HoldableObject {
     }
 
 
-    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
+    public void whenBroken(Tile[][] tiles, int x, int y) {
         if (tiles[x][y].itemID != ItemID.TILE_AIR) {
             Game.tiles[x][y] = TilePresets.getTilePreset(x * TileGraphics.TILE_WIDTH, y * TileGraphics.TILE_HEIGHT, TileGraphics.TILE_WIDTH, TileGraphics.TILE_HEIGHT, ItemID.TILE_AIR);
-            if (brokenByEntity != null) {
-                brokenByEntity.inventory.addToInventory(new HoldableObject(this.dropItemID), 1);
-            }
             triggerUpdate(tiles, x, y);
             if (Game.chunks != null && Game.chunks[x] != null) {
                 Game.chunks[x].yValues.add(y);
             }
+        }
+        for (ItemStack droppedItemStack : droppedItemStacks) {
+            Game.livingDroppedItems.add(new DroppedItem(((x * TileGraphics.TILE_WIDTH) + (double) (TileGraphics.TILE_WIDTH/2))-8, ((y * TileGraphics.TILE_HEIGHT) + (double) (TileGraphics.TILE_HEIGHT/2))-8, 0, 16, 16, this.generateTexture(droppedItemStack.holdableObject.itemID), droppedItemStack.holdableObject.itemID, droppedItemStack.quantity));
         }
     }
 

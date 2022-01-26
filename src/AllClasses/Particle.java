@@ -1,3 +1,5 @@
+package AllClasses;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -62,7 +64,6 @@ public class Particle extends MovingObject {
     void deconstruct(boolean confirm){
         if(confirm){
             Game.layeredPane.remove(textureLabel);
-            this.hitbox = null;
             Game.livingParticles.remove(this);
             Game.layeredPane.repaint();
         }

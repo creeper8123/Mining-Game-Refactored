@@ -1,4 +1,10 @@
+package AllClasses;
+
+import UniqueIDs.ItemID;
+
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.IntStream;
 
 /**
@@ -27,8 +33,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -41,7 +47,7 @@ public class TilePresets {
                         //Do nothing
                     }
                 };
-                finalTile.dropItemID = null;
+                //finalTile.droppedItems = new ArrayList<>();
             }
             case TILE_STONE -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -57,8 +63,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -71,7 +77,7 @@ public class TilePresets {
                         //Do nothing
                     }
                 };
-                finalTile.dropItemID = ItemID.TILE_STONE;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_STONE, 1));
             }
             case TILE_DIRT_GRASS -> {
                 final double KILL_GRASS_THRESHOLD = 0.5;
@@ -88,8 +94,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -107,7 +113,7 @@ public class TilePresets {
                         }
                     }
                 };
-                finalTile.dropItemID = ItemID.TILE_DIRT;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_DIRT, 1));
             }
             case TILE_DIRT -> {
                 final double GROW_GRASS_THRESHOLD = 0.5;
@@ -124,8 +130,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -143,7 +149,7 @@ public class TilePresets {
                         }
                     }
                 };
-                finalTile.dropItemID = ItemID.TILE_DIRT;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_DIRT, 1));
             }
             case TILE_COAL_ORE -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -159,8 +165,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -173,7 +179,7 @@ public class TilePresets {
                         //Do nothing
                     }
                 };
-                finalTile.dropItemID = ItemID.TILE_COAL_ORE;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_COAL_ORE, 1));
             }
             case TILE_COPPER_ORE -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -189,8 +195,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -203,7 +209,7 @@ public class TilePresets {
                         //Do nothing
                     }
                 };
-                finalTile.dropItemID = ItemID.TILE_COPPER_ORE;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_COPPER_ORE, 1));
             }
             case TILE_TIN_ORE -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -219,8 +225,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -233,7 +239,7 @@ public class TilePresets {
                         //Do nothing
                     }
                 };
-                finalTile.dropItemID = ItemID.TILE_TIN_ORE;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_TIN_ORE, 1));
             }
             case TILE_IRON_ORE -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -249,8 +255,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -263,7 +269,7 @@ public class TilePresets {
                         //Do nothing
                     }
                 };
-                finalTile.dropItemID = ItemID.TILE_IRON_ORE;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_IRON_ORE, 1));
             }
             case TILE_GOLD_ORE -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -279,8 +285,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -293,7 +299,7 @@ public class TilePresets {
                         //Do nothing
                     }
                 };
-                finalTile.dropItemID = ItemID.TILE_GOLD_ORE;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_GOLD_ORE, 1));
             }
             case TILE_DIAMOND_ORE -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -309,8 +315,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -323,7 +329,7 @@ public class TilePresets {
                         //Do nothing
                     }
                 };
-                finalTile.dropItemID = ItemID.TILE_DIAMOND_ORE;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_DIAMOND_ORE, 1));
             }
             case TILE_STALACTITE -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -339,15 +345,15 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
                     public void onTileUpdate(Tile[][] tiles, int x, int y) {
                         if (y > 0) {
                             if (tiles[x][y - 1].itemID == ItemID.TILE_AIR && this.itemID != ItemID.TILE_AIR) {
-                                this.whenBroken(tiles, x, y, null);
+                                this.whenBroken(tiles, x, y);
                                 Game.livingEntities.add(new FallingStalactite(x * TileGraphics.TILE_WIDTH, y * TileGraphics.TILE_HEIGHT, this.hitbox.width, this.hitbox.height, ImageProcessing.resizeImage(ImageProcessing.removeNullPixels(this.texture), 4, 4)));
                             }
                         }
@@ -359,7 +365,6 @@ public class TilePresets {
                     }
                 };
                 finalTile.hasTransparency = true;
-                finalTile.dropItemID = null;
                 finalTile.hitbox = new Rectangle(x + 20, y, width - 40, height - 16);
             }
             case TILE_STALAGMITE -> {
@@ -376,15 +381,15 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
                     public void onTileUpdate(Tile[][] tiles, int x, int y) {
                         if (y < tiles[0].length - 1) {
                             if (tiles[x][y + 1].itemID == ItemID.TILE_AIR) {
-                                this.whenBroken(tiles, x, y, null);
+                                this.whenBroken(tiles, x, y);
                             }
                         }
                     }
@@ -395,7 +400,6 @@ public class TilePresets {
                     }
                 };
                 finalTile.hasTransparency = true;
-                finalTile.dropItemID = null;
                 finalTile.hitbox = new Rectangle(x + 20, y + 16, width - 40, height - 16);
             }
             case TILE_LOG -> {
@@ -414,15 +418,15 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
                     public void onTileUpdate(Tile[][] tiles, int x, int y) {
                         if (y < tiles.length) {
                             if (!(tiles[x][y + 1].itemID == ItemID.TILE_LOG || tiles[x][y + 1].itemID == ItemID.TILE_LEAFY_LOG || tiles[x][y + 1].itemID == ItemID.TILE_DIRT || tiles[x][y + 1].itemID == ItemID.TILE_DIRT_GRASS)) {
-                                this.whenBroken(tiles, x, y, null);
+                                this.whenBroken(tiles, x, y);
                             }
                         }
                     }
@@ -553,7 +557,7 @@ public class TilePresets {
                         }
                     }
                 };
-                finalTile.dropItemID = ItemID.TILE_WOOD;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_WOOD, 1));
             }
             case TILE_LEAVES -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -567,12 +571,17 @@ public class TilePresets {
                     public void whenPlaced(Tile[][] tiles, int x, int y, MovingObject placedByEntity) {
                         super.whenPlaced(tiles, x, y, placedByEntity);
                         double randomDrop = Game.TICK_RANDOM.nextDouble();
-                        dropItemID = randomDrop >= 0.66666666 ? ItemID.ITEM_STICK : randomDrop < 0.1 ? ItemID.ITEM_PINE_CONE : null;
+                        ItemID itemToDrop = randomDrop >= 0.66666666 ? ItemID.ITEM_STICK : randomDrop < 0.1 ? ItemID.ITEM_PINE_CONE : null;
+                        if(itemToDrop == ItemID.ITEM_PINE_CONE){
+                            this.droppedItemStacks.add(new ItemStack(ItemID.ITEM_PINE_CONE, 1));
+                        }else if(itemToDrop == ItemID.ITEM_STICK){
+                            this.droppedItemStacks.add(new ItemStack(ItemID.ITEM_STICK, (int) (Game.TICK_RANDOM.nextDouble()*3)+1));
+                        }
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -607,7 +616,7 @@ public class TilePresets {
                             }
                         }
                         if (killLeaf) {
-                            this.whenBroken(tiles, x, y, null);
+                            this.whenBroken(tiles, x, y);
                         }
                     }
 
@@ -629,18 +638,25 @@ public class TilePresets {
                     @Override
                     public void whenPlaced(Tile[][] tiles, int x, int y, MovingObject placedByEntity) {
                         super.whenPlaced(tiles, x, y, placedByEntity);
+                        double randomDrop = Game.TICK_RANDOM.nextDouble();
+                        ItemID itemToDrop = randomDrop >= 0.66666666 ? ItemID.ITEM_STICK : randomDrop < 0.1 ? ItemID.ITEM_PINE_CONE : null;
+                        if(itemToDrop == ItemID.ITEM_PINE_CONE){
+                            this.droppedItemStacks.add(new ItemStack(ItemID.ITEM_PINE_CONE, 1));
+                        }else if(itemToDrop == ItemID.ITEM_STICK){
+                            this.droppedItemStacks.add(new ItemStack(ItemID.ITEM_STICK, (int) (Game.TICK_RANDOM.nextDouble()*3)+1));
+                        }
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
                     public void onTileUpdate(Tile[][] tiles, int x, int y) {
                         if (y < tiles.length) {
                             if (!(tiles[x][y + 1].itemID == ItemID.TILE_LOG || tiles[x][y + 1].itemID == ItemID.TILE_LEAFY_LOG || tiles[x][y + 1].itemID == ItemID.TILE_DIRT || tiles[x][y + 1].itemID == ItemID.TILE_DIRT_GRASS)) {
-                                this.whenBroken(tiles, x, y, null);
+                                this.whenBroken(tiles, x, y);
                             }
                         }
                     }
@@ -663,7 +679,6 @@ public class TilePresets {
                     }
                 };
                 //finalTile.hasTransparency = true;
-                finalTile.dropItemID = ItemID.TILE_WOOD;
             }
             case TILE_TREE_STARTER -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -676,11 +691,18 @@ public class TilePresets {
                     @Override
                     public void whenPlaced(Tile[][] tiles, int x, int y, MovingObject placedByEntity) {
                         super.whenPlaced(tiles, x, y, placedByEntity);
+                        double randomDrop = Game.TICK_RANDOM.nextDouble();
+                        ItemID itemToDrop = randomDrop >= 0.66666666 ? ItemID.ITEM_STICK : randomDrop < 0.1 ? ItemID.ITEM_PINE_CONE : null;
+                        if(itemToDrop == ItemID.ITEM_PINE_CONE){
+                            this.droppedItemStacks.add(new ItemStack(ItemID.ITEM_PINE_CONE, 1));
+                        }else if(itemToDrop == ItemID.ITEM_STICK){
+                            this.droppedItemStacks.add(new ItemStack(ItemID.ITEM_STICK, (int) (Game.TICK_RANDOM.nextDouble()*3)+1));
+                        }
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -698,6 +720,7 @@ public class TilePresets {
                         }
                     }
                 };
+                //finalTile.droppedItems = new ArrayList<>();
             }
             case TILE_WOOD -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -713,8 +736,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -727,7 +750,7 @@ public class TilePresets {
                         //Do nothing
                     }
                 };
-                finalTile.dropItemID = ItemID.TILE_WOOD;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_WOOD, 1));
             }
             case TILE_WORKBENCH_L1 -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -743,8 +766,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -758,7 +781,7 @@ public class TilePresets {
                     }
                 };
                 finalTile.hasTransparency = true;
-                finalTile.dropItemID = ItemID.TILE_WORKBENCH_L1;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_WORKBENCH_L1, 1));
                 finalTile.hitbox.y += TileGraphics.TILE_HEIGHT / 2;
                 finalTile.hitbox.height /= 2;
             }
@@ -781,8 +804,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -798,7 +821,7 @@ public class TilePresets {
                     }
                 };
                 finalTile.hasTransparency = true;
-                finalTile.dropItemID = ItemID.TILE_FURNACE_L1;
+                finalTile.droppedItemStacks.add(new ItemStack(ItemID.TILE_FURNACE_L1, 1));
             }
             default -> {
                 finalTile = new Tile(x, y, width, height, tileID) {
@@ -814,8 +837,8 @@ public class TilePresets {
                     }
 
                     @Override
-                    public void whenBroken(Tile[][] tiles, int x, int y, MovingObject brokenByEntity) {
-                        super.whenBroken(tiles, x, y, brokenByEntity);
+                    public void whenBroken(Tile[][] tiles, int x, int y) {
+                        super.whenBroken(tiles, x, y);
                     }
 
                     @Override
@@ -828,7 +851,7 @@ public class TilePresets {
                         //Do nothing
                     }
                 };
-                finalTile.dropItemID = ItemID.TILE_AIR;
+                finalTile.droppedItemStacks.add(new ItemStack(finalTile.itemID, 1));
             }
         }
         return finalTile;

@@ -1,3 +1,7 @@
+package AllClasses;
+
+import UniqueIDs.ItemID;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -83,7 +87,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                 this.menu.setText(fullMenuDisplayContents);
             }
         };
-        this.inventoryMenu.setMenuTitle("---Player Inventory---");
+        this.inventoryMenu.setMenuTitle("---AllClasses.Player Inventory---");
         inventoryMenu.setMenuContents(inventory.getInventory(), 210);
         inventoryMenu.setMenuSize(inventoryMenu.menuWidth, inventoryMenu.menuHeight + 45);
         inventoryMenu.addButton(0, inventoryMenu.menuHeight+5, 20, inventoryMenu.menuWidth, "Sort Inventory", () -> {
@@ -129,7 +133,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
         inventoryMenu.setMenuPosition(-(Game.screenX), -(Game.screenY));
         altMenu.setMenuPosition(-Game.screenX+300, -Game.screenY);
 
-        //this.textureLabel.setIcon(new ImageIcon(ImageProcessing.resizeImage(ImageProcessing.rotateImage(ImageProcessing.imageToBufferedImage(ImageProcessing.getImageFromResources("textures/missingTexture.png")), (int) (Game.MOVING_OBJECT_RANDOM.nextDouble() * 4)), 4, 4)));
+        //this.textureLabel.setIcon(new ImageIcon(AllClasses.ImageProcessing.resizeImage(AllClasses.ImageProcessing.rotateImage(AllClasses.ImageProcessing.imageToBufferedImage(AllClasses.ImageProcessing.getImageFromResources("textures/missingTexture.png")), (int) (AllClasses.Game.MOVING_OBJECT_RANDOM.nextDouble() * 4)), 4, 4)));
 
         if(altMenuTileItemID != null){
             if(altMenuTileItemID != Game.tiles[altMenuTileX][altMenuTileY].itemID){
@@ -142,7 +146,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                 int tileMiddleY = (altMenuTileY * TileGraphics.TILE_HEIGHT) + (TileGraphics.TILE_HEIGHT/2);
                 int playerMiddleX = (int) this.x + (PLAYER_WIDTH/2);
                 int playerMiddleY = (int) this.y + (PLAYER_HEIGHT/2);
-                //System.out.println("Tile Middle Pos: {" + tileMiddleX + "," + tileMiddleY + "}, Player Middle Pos: {" + playerMiddleX + "," + playerMiddleY + "}, Distance: " + Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)));
+                //System.out.println("AllClasses.Tile Middle Pos: {" + tileMiddleX + "," + tileMiddleY + "}, AllClasses.Player Middle Pos: {" + playerMiddleX + "," + playerMiddleY + "}, Distance: " + Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)));
                 if(Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)) > PLAYER_REACH){
                     //System.out.println("Too far from tile, " + Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)));
                     altMenuTileX = null;
@@ -231,7 +235,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
 
     @Override
     public String toString(){
-        String playerData = "Player Info: {";
+        String playerData = "AllClasses.Player Info: {";
         playerData += "Key Inputs: {";
         playerData += "Left: [" + leftPressed;
         playerData += "], Right: [" + rightPressed;
@@ -292,7 +296,6 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
 
     @Override
     public void keyReleased(KeyEvent e) {
-        System.out.println(e.getKeyCode());
         switch(e.getKeyCode()){
             case 16, 17 -> this.sprintPressed = false;
             case 37, 65 -> this.leftPressed = false;
@@ -327,7 +330,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
         if(Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)) < PLAYER_REACH){
             if(e.getButton() == 1){
                 if(Game.tiles[tileX][tileY].canBeBroken){
-                    Game.tiles[tileX][tileY].whenBroken(Game.tiles, tileX, tileY, this);
+                    Game.tiles[tileX][tileY].whenBroken(Game.tiles, tileX, tileY);
                 }
             //TODO: Disable manual random updates after testing (remove all button 2 code).
             }else if(e.getButton() == 2){

@@ -1,4 +1,4 @@
-import org.w3c.dom.ls.LSOutput;
+package AllClasses;
 
 import javax.swing.*;
 import java.awt.*;
@@ -7,7 +7,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 
 public class MenuDisplay<E> implements MouseListener, MouseWheelListener {
     public static final int STANDARD_TEXT_HEIGHT_PIXELS = 15;
@@ -76,11 +75,11 @@ public class MenuDisplay<E> implements MouseListener, MouseWheelListener {
         menuContents[index] = newMenuContent;
     }
 
-    public Object[] getMenuContents() {
+    public E[] getMenuContents() {
         return menuContents;
     }
 
-    public Object getMenuContents(int index) {
+    public E getMenuContents(int index) {
         return menuContents[index];
     }
 

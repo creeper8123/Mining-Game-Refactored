@@ -1,3 +1,7 @@
+package AllClasses;
+
+import UniqueIDs.ItemID;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -87,7 +91,7 @@ public abstract class MovingObject {
         Game.layeredPane.setLayer(textureLabel, textureLayer);
     }
 
-    //Default values, can be changed in objects extends MovingObject
+    //Default values, can be changed in objects extends AllClasses.MovingObject
     /**The ArrayList of ItemIDs that the moving object will not check for collisions on.*/ArrayList<ItemID> nonSolidTiles = new ArrayList<>(List.of(ItemID.TILE_AIR));
 
     /**The width of the object (from the upper left corner).*/int width;
@@ -363,7 +367,6 @@ public abstract class MovingObject {
     void deconstruct(boolean confirm){
         if(confirm){
             Game.layeredPane.remove(textureLabel);
-            this.hitbox = null;
             Game.livingEntities.remove(this);
         }
     }

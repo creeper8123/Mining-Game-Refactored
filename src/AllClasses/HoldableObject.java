@@ -1,14 +1,18 @@
+package AllClasses;
+
+import UniqueIDs.ItemID;
+
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 /**
- * A HoldableObject is an object that does not move, but can be stored in an inventory, used in crafting, or be interacted with in some other way.
+ * A AllClasses.HoldableObject is an object that does not move, but can be stored in an inventory, used in crafting, or be interacted with in some other way.
  */
 public class HoldableObject{
     /***/String displayName;
     /**The unscaled texture of the object.*/BufferedImage texture;
-    /**The ItemID that identifies the object.*/ItemID itemID;
-    /**A flag to render the texture while replacing the ImageProcessing.NULL_COLOR colours of the textures with full transparency. Note: The removal must be the final step, several Image Processing functions will reset the alpha value.*/boolean hasTransparency = false;
+    /**The UniqueIDs.ItemID that identifies the object.*/ItemID itemID;
+    /**A flag to render the texture while replacing the AllClasses.ImageProcessing.NULL_COLOR colours of the textures with full transparency. Note: The removal must be the final step, several Image Processing functions will reset the alpha value.*/boolean hasTransparency = false;
 
 
     public HoldableObject(ItemID itemID, String displayName){
@@ -43,8 +47,8 @@ public class HoldableObject{
     //TODO: Store both the base texture and the overlay texture as separate objects, so texture transitions can be done smoother.
     //TODO: Make a whenUsed method here, use that for tile placing in the world.
     /**
-     * Generates a texture for each unique ItemID, defaults to a null texture if the texture file or the ItemID cannot be found.
-     * @param itemID The ItemID to generate a texture for.
+     * Generates a texture for each unique UniqueIDs.ItemID, defaults to a null texture if the texture file or the UniqueIDs.ItemID cannot be found.
+     * @param itemID The UniqueIDs.ItemID to generate a texture for.
      * @return Returns a 16x16 BufferedImage of the texture.
      */
     public BufferedImage generateTexture(ItemID itemID){

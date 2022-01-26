@@ -1,13 +1,15 @@
+package AllClasses;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
+import java.util.HashMap;
 
 //TODO: Make method that flips image on an axis.
 /**
- * ImageProcessing is a utility class that handles most of the work involving BufferedImages.
+ * AllClasses.ImageProcessing is a utility class that handles most of the work involving BufferedImages.
  */
 public class ImageProcessing{
     /**Pixels of this colour have the option to be rendered with full transparency.*/public static final Color NULL_COLOR = new Color(255, 82, 255, 255); //Use for green 32 in GIMP, for some reason it comes out as 82. Continue to use 32 in GIMP and 82 here.
@@ -17,6 +19,7 @@ public class ImageProcessing{
     /**The layer of the JLayeredPane that moving objects will be assigned to.*/static final int MOVING_OBJECT_LAYER = 3;
     /***/public static final int HUD_LAYER = 5;
     public static final int PARTICLE_LAYER = 4;
+    private static final HashMap<String, BufferedImage> loadedImages = new HashMap<>();
 
     /**
      * Retrieves a texture from the resources folder. Note that "resources/" is automatically added to the front of the filepath.
@@ -24,11 +27,16 @@ public class ImageProcessing{
      * @return Returns a BufferedImage of the desired texture.
      */
     public static BufferedImage getImageFromResources(String filepath) {
-        try{
-            return imageToBufferedImage(new ImageIcon("resources/" + filepath).getImage());
-        }catch(Exception exception){
-            System.err.println("Warning! Texture " + "[resources/" + filepath + "] not found! Defaulting to [resources/textures/missingTexture.png].");
-            return imageToBufferedImage(new ImageIcon("resources/textures/missingTexture.png").getImage());
+        if(loadedImages.containsKey(filepath)){
+            return loadedImages.get(filepath);
+        }else{
+            try{
+                loadedImages.put(filepath, imageToBufferedImage(new ImageIcon("resources/" + filepath).getImage()));
+                return loadedImages.get(filepath);
+            }catch(Exception exception){
+                System.err.println("Warning! Texture " + "[resources/" + filepath + "] not found! Defaulting to [resources/textures/missingTexture.png].");
+                return imageToBufferedImage(new ImageIcon("resources/textures/missingTexture.png").getImage());
+            }
         }
     }
 
@@ -106,13 +114,13 @@ public class ImageProcessing{
         for (int x = 0; x < baseBufferedImage.getWidth(); x++) {
             for (int y = 0; y < baseBufferedImage.getHeight(); y++) {
                 Color myColour;
-                myColour = new Color(topBufferedImage.getRGB(x, y));
+                myColour = new Color(topBufferedImage.getRGB(x, y), true);
                 aO = myColour.getAlpha();
                 rO = myColour.getRed();
                 gO = myColour.getGreen();
                 bO = myColour.getBlue();
                 if(rO == NULL_COLOR.getRed() && gO == NULL_COLOR.getGreen() && bO == NULL_COLOR.getBlue()){
-                    myColour = new Color(baseBufferedImage.getRGB(x, y));
+                    myColour = new Color(baseBufferedImage.getRGB(x, y), true);
                     aB = myColour.getAlpha();
                     rB = myColour.getRed();
                     gB = myColour.getGreen();
@@ -142,7 +150,7 @@ public class ImageProcessing{
         int col;// = ((a&0x0ff)<<24)|((r&0x0ff)<<16)|((g&0x0ff)<<8)|(b&0x0ff);
         for (int x = 0; x < inputBufferedImage.getWidth(); x++) {
             for (int y = 0; y < inputBufferedImage.getHeight(); y++) {
-                Color myColour = new Color(inputBufferedImage.getRGB(x, y));
+                Color myColour = new Color(inputBufferedImage.getRGB(x, y), true);
                 a = myColour.getAlpha();
                 r = (int) (myColour.getRed() * modifier);
                 g = (int) (myColour.getGreen() * modifier);
@@ -168,7 +176,7 @@ public class ImageProcessing{
         int col;// = ((a&0x0ff)<<24)|((r&0x0ff)<<16)|((g&0x0ff)<<8)|(b&0x0ff);
         for (int x = 0; x < inputBufferedImage.getWidth(); x++) {
             for (int y = 0; y < inputBufferedImage.getHeight(); y++) {
-                Color myColour = new Color(inputBufferedImage.getRGB(x, y));
+                Color myColour = new Color(inputBufferedImage.getRGB(x, y), true);
                 a = myColour.getAlpha();
                 r = myColour.getRed();
                 g = myColour.getGreen();

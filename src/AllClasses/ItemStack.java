@@ -1,10 +1,14 @@
+package AllClasses;
+
+import UniqueIDs.ItemID;
+
 /**
- * A stack of a single type of ItemID, containing an ItemID and its current quantity.
+ * A stack of a single type of UniqueIDs.ItemID, containing an UniqueIDs.ItemID and its current quantity.
  */
-//TODO: Move this into it's own class outside of InventoryManager.
+//TODO: Move this into it's own class outside of AllClasses.InventoryManager.
 public class ItemStack {
     /**
-     * The ItemID currently in the slot.
+     * The UniqueIDs.ItemID currently in the slot.
      */
     public HoldableObject holdableObject;
     /**
@@ -13,7 +17,7 @@ public class ItemStack {
     public int quantity;
 
     /**
-     * Initializes the ItemID with null, and the Quantity with null.
+     * Initializes the UniqueIDs.ItemID with null, and the Quantity with null.
      */
     public ItemStack() {
         holdableObject = null;

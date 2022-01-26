@@ -1,14 +1,16 @@
+package AllClasses;
+
 import java.awt.*;
 
 /**
- * A FallingStalactite is a moving objects that falls when spawned, and is deconstructed when it hits another solid tile.
+ * A AllClasses.FallingStalactite is a moving objects that falls when spawned, and is deconstructed when it hits another solid tile.
  */
 public class FallingStalactite extends MovingObject{
 
     /**
-     * Calls the MovingObject constructor with the following parameters
-     * @param x The x position the FallingStalactite will spawn at (from the upper right corner).
-     * @param y The y position the FallingStalactite will spawn at (from the upper right corner).
+     * Calls the AllClasses.MovingObject constructor with the following parameters
+     * @param x The x position the AllClasses.FallingStalactite will spawn at (from the upper right corner).
+     * @param y The y position the AllClasses.FallingStalactite will spawn at (from the upper right corner).
      * @param width The width of the Falling Stalactite's hitbox.
      * @param height The height of the Falling Stalactite's hitbox.
      * @param textureLocation The file path of the texture of the Falling Stalactite.
@@ -18,9 +20,9 @@ public class FallingStalactite extends MovingObject{
     }
 
     /**
-     * Calls the MovingObject constructor with the following parameters
-     * @param x The x position the FallingStalactite will spawn at (from the upper right corner).
-     * @param y The y position the FallingStalactite will spawn at (from the upper right corner).
+     * Calls the AllClasses.MovingObject constructor with the following parameters
+     * @param x The x position the AllClasses.FallingStalactite will spawn at (from the upper right corner).
+     * @param y The y position the AllClasses.FallingStalactite will spawn at (from the upper right corner).
      * @param width The width of the Falling Stalactite's hitbox.
      * @param height The height of the Falling Stalactite's hitbox.
      * @param newTexture The texture to be shown on the object.

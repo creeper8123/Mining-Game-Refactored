@@ -1,16 +1,20 @@
+package AllClasses;
+
+import UniqueIDs.ItemID;
+
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * InventoryManager creates an inventory consisting of slots, themselves consisting of an ItemID as an identifier, and a quantity. It also has several methods for interacting with the inventory.
+ * AllClasses.InventoryManager creates an inventory consisting of slots, themselves consisting of an UniqueIDs.ItemID as an identifier, and a quantity. It also has several methods for interacting with the inventory.
  */
 public class InventoryManager {
 
 
     /**
-     * Defines and returns the stack size of each item in ItemID.java, returning -1 if the item is not in the list.
-     * @param itemID The ItemID to get the stack size for.
-     * @return The stack size of the input ItemID.
+     * Defines and returns the stack size of each item in UniqueIDs.ItemID.java, returning -1 if the item is not in the list.
+     * @param itemID The UniqueIDs.ItemID to get the stack size for.
+     * @return The stack size of the input UniqueIDs.ItemID.
      */
     protected static int getStackSize(ItemID itemID){
         switch(itemID){
@@ -57,11 +61,11 @@ public class InventoryManager {
         return Integer.MAX_VALUE;
     }
 
-    /**A list of ItemStack objects.*/public ItemStack[] inventory;
+    /**A list of AllClasses.ItemStack objects.*/public ItemStack[] inventory;
 
     /**
-     * Creates a list of ItemStack to a set length. If the length is less than 0, it is reset to 0.
-     * @param length The amount of ItemStack objects in the inventory.
+     * Creates a list of AllClasses.ItemStack to a set length. If the length is less than 0, it is reset to 0.
+     * @param length The amount of AllClasses.ItemStack objects in the inventory.
      */
     public InventoryManager(int length){
         length = Math.max(length, 0);
@@ -194,9 +198,9 @@ public class InventoryManager {
     }
 
     /**
-     * Attempts to add an item to the inventory, first adding it to existing items of the same ItemID, then to empty slots if there are still items remaining.
-     * @param holdableObject The HoldableObject to be added to the inventory.
-     * @param quantity The amount of the ItemID to be added.
+     * Attempts to add an item to the inventory, first adding it to existing items of the same UniqueIDs.ItemID, then to empty slots if there are still items remaining.
+     * @param holdableObject The AllClasses.HoldableObject to be added to the inventory.
+     * @param quantity The amount of the UniqueIDs.ItemID to be added.
      * @return Returns the number of items that cannot be allocated due to the inventory being full.
      */
     public int addToInventory(HoldableObject holdableObject, int quantity){
@@ -246,7 +250,7 @@ public class InventoryManager {
 
     /**
      * Attempts to add items to a specific index of the inventory.
-     * @param holdableObject The HoldableObject of the items to be added.
+     * @param holdableObject The AllClasses.HoldableObject of the items to be added.
      * @param quantity The amount of Items to add to the slot.
      * @param i The index of the desired slot.
      * @return Returns the number of items that cannot be allocated due to the inventory slot being full.
@@ -285,7 +289,7 @@ public class InventoryManager {
 
     /**
      * Attempts to remove items from the inventory, starting from the end of the inventory working backwards.
-     * @param holdableObject The HoldableObject to attempt to remove from the inventory.
+     * @param holdableObject The AllClasses.HoldableObject to attempt to remove from the inventory.
      * @param quantity The number of items to attempt to remove from the inventory.
      * @return Returns the number of unallocated items that could not be removed because none are in the inventory.
      */
@@ -321,7 +325,7 @@ public class InventoryManager {
 
     /**
      * Attempts to remove items from the inventory at a specified index.
-     * @param holdableObject The HoldableObject to remove from the slot (Used for conformation).
+     * @param holdableObject The AllClasses.HoldableObject to remove from the slot (Used for conformation).
      * @param quantity The amount of items to remove from the slot.
      * @param i The index to remove items from.
      * @return Returns the number of unallocated items that could not be removed because none are in the designated inventory slot.
@@ -356,9 +360,9 @@ public class InventoryManager {
     }
 
     /**
-     * Gets the total quantity of a ItemID currently in the inventory.
-     * @param holdableObject The HoldableObject to search for in the inventory.
-     * @return Returns the number of items of a certain ItemID currently in the inventory.
+     * Gets the total quantity of a UniqueIDs.ItemID currently in the inventory.
+     * @param holdableObject The AllClasses.HoldableObject to search for in the inventory.
+     * @return Returns the number of items of a certain UniqueIDs.ItemID currently in the inventory.
      */
     public int getQuantityInInventory(HoldableObject holdableObject){
         if(holdableObject == null || holdableObject.itemID == null){
@@ -374,9 +378,9 @@ public class InventoryManager {
     }
 
     /**
-     * Checks the inventory to see if a certain ItemID is present.
-     * @param holdableObject The HoldableObject to search for in the inventory.
-     * @return Returns true if the ItemID is found, returns false otherwise.
+     * Checks the inventory to see if a certain UniqueIDs.ItemID is present.
+     * @param holdableObject The AllClasses.HoldableObject to search for in the inventory.
+     * @return Returns true if the UniqueIDs.ItemID is found, returns false otherwise.
      */
     public boolean hasItemType(HoldableObject holdableObject){
         for (int i = 0; i < inventory.length; i++) {
@@ -392,18 +396,18 @@ public class InventoryManager {
     }
 
     /**
-     * Gets the ItemStack at a certain index.
+     * Gets the AllClasses.ItemStack at a certain index.
      * @param i The index to retrieve from.
-     * @return The ItemStack at the index.
+     * @return The AllClasses.ItemStack at the index.
      */
     public ItemStack getInventorySlot(int i){
         return inventory[i];
     }
 
     /**
-     * Overrides the ItemStack at the specified index.
+     * Overrides the AllClasses.ItemStack at the specified index.
      * @param i The index to override.
-     * @param itemStack The ItemStack to set the index to.
+     * @param itemStack The AllClasses.ItemStack to set the index to.
      */
     public void setInventorySlot(int i, ItemStack itemStack){
         inventory[i] = itemStack;
@@ -411,7 +415,7 @@ public class InventoryManager {
     }
 
     /**
-     * Sorts the items in the inventory based on their position in ItemID.java, where items higher up are listed higher in the inventory.
+     * Sorts the items in the inventory based on their position in UniqueIDs.ItemID.java, where items higher up are listed higher in the inventory.
      */
     public void sortInventory(){
         //TODO: Implement Sorting algorithm for inventory
@@ -422,7 +426,7 @@ public class InventoryManager {
     }
 
     /**
-     * Resets an item in the inventory to a new ItemStack if it's quantity is 0.
+     * Resets an item in the inventory to a new AllClasses.ItemStack if it's quantity is 0.
      */
     private void resetEmptySlots(){
         for (int i = 0; i < inventory.length; i++) {

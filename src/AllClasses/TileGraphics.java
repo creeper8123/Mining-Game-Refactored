@@ -1,3 +1,7 @@
+package AllClasses;
+
+import UniqueIDs.ItemID;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;

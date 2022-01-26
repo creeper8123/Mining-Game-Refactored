@@ -1,3 +1,5 @@
+package AllClasses;
+
 import java.util.ArrayList;
 import java.util.Random;
 

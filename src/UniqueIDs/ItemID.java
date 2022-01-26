@@ -1,16 +1,18 @@
+package UniqueIDs;
+
 /**
  * Item IDs for unique items.
  */
 
 /*
-When adding a new ItemID, needs to update:
-HoldableObject.generateTexture(itemID);                     //Only if object can be placed
-HoldableObject.generateDisplayName(itemID);                 //Only if item is intended to be held.
-HoldableObject.getCraftingRecipe(itemID);                   //Only if item can be crafted.
-HoldableObject.whenUsed(int x, int y, MovingObject usedBy); //Only if the item has a use or can be placed (IE is not an intermediate crafting item)
-InventoryManager.getStackSize(itemID);                      //Only if item is intended to be held.
-Tiles.Tile.TilePresets.getTilePreset();                     //For tiles only
-TileGeneration.xyzGeneration();                             //For tiles only, and only if naturally occurring.
+When adding a new UniqueIDs.ItemID, needs to update:
+AllClasses.HoldableObject.generateTexture(itemID);                     //Only if object can be placed
+AllClasses.HoldableObject.generateDisplayName(itemID);                 //Only if item is intended to be held.
+AllClasses.HoldableObject.getCraftingRecipe(itemID);                   //Only if item can be crafted.
+AllClasses.HoldableObject.whenUsed(int x, int y, AllClasses.MovingObject usedBy); //Only if the item has a use or can be placed (IE is not an intermediate crafting item)
+AllClasses.InventoryManager.getStackSize(itemID);                      //Only if item is intended to be held.
+Tiles.Tile.AllClasses.TilePresets.getTilePreset();                     //For tiles only
+AllClasses.TileGeneration.xyzGeneration();                             //For tiles only, and only if naturally occurring.
 */
 public enum ItemID {
     /**The ID for an Air tile.*/TILE_AIR,

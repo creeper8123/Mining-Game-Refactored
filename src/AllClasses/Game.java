@@ -1,3 +1,7 @@
+package AllClasses;
+
+import UniqueIDs.ItemID;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -12,10 +16,10 @@ import java.util.*;
  */
 public class Game{
     /**The number of milliseconds between ticks.*/public static final long MILLISECONDS_PER_UPDATE = 16;
-    /**The seed of the world, and all world related generation.*/public static final long WORLD_RANDOM_SEED = new Random().nextLong();
+    /**The seed of the world, and all world related generation.*/public static final long WORLD_RANDOM_SEED = 1;//new Random().nextLong();
     /**The random number generator used for terrain and terrain texture generation.*/public static final Random WORLD_RANDOM = new Random(WORLD_RANDOM_SEED);
-    public static final Random TICK_RANDOM = new Random();
-    public static final Random MOVING_OBJECT_RANDOM = new Random();
+    /**The random number generator used for calling random updates.*/public static final Random TICK_RANDOM = new Random();
+    /**The random number generator used by all moving objects.*/public static final Random MOVING_OBJECT_RANDOM = new Random();
     /**The frame that the game is in.*/public static JFrame frame = new JFrame();
     /**The layered pane that the textures are shown on, and that separates the layers into manageable sections.*/public static JLayeredPane layeredPane = new JLayeredPane();
     /**The timer that the game ticks are looped in.*/public static Timer mainGameLoop;
@@ -23,11 +27,13 @@ public class Game{
     /**The list of chunks that store the textures and handle tile breaking.*/public static TileGraphics[] chunks;
     /**A copy of tiles used to generate the background textures.*/public static Tile[][] backgroundTiles;
     /**The size of the screen.*/protected static Dimension screenSize;
-    /***/public static int screenX;
-    /***/public static int screenY;
-    /**The list of currently active entities to update each game tick. The Player will always be the 1st object in the ArrayList.*/public static ArrayList<MovingObject> livingEntities = new ArrayList<>();
-    /**The list of currently active particles to update each game tick. The Player will always be the 1st object in the ArrayList.*/public static ArrayList<MovingObject> livingParticles = new ArrayList<>();
-    /**The list of currently active projectiles to update each game tick. The Player will always be the 1st object in the ArrayList.*/public static ArrayList<MovingObject> livingProjectiles = new ArrayList<>();
+    /**The x position of the JLayeredPane inside the JFrame*/public static int screenX;
+    /**The y position of the JLayeredPane inside the JFrame*/public static int screenY;
+    /**The list of currently active entities to update each game tick.*/public static ArrayList<MovingObject> livingEntities = new ArrayList<>();
+    /**The list of currently active particles to update each game tick.*/public static ArrayList<Particle> livingParticles = new ArrayList<>();
+    /**The list of currently active projectiles to update each game tick.*/public static ArrayList<MovingObject> livingProjectiles = new ArrayList<>();
+    /**The list of currently active projectiles to update each game tick.*/public static ArrayList<DroppedItem> livingDroppedItems = new ArrayList<>();
+
     /***/public static Player player;
     public static int playerSpawnX = 0;
     /**The number of tiles to randomly select per tick. The same tile can be selected multiple times.*/private static final int RANDOM_SELECTIONS_PER_CHUNK_PER_UPDATE = 1;
@@ -48,6 +54,7 @@ public class Game{
                         livingParticles.get(i).deconstruct(true);
                     }
                     layeredPane.repaint();
+                    System.gc();
                 }
                 startTime = System.currentTimeMillis();
 
@@ -76,6 +83,15 @@ public class Game{
                     int oldSize = livingParticles.size();
                     livingParticles.get(i).onUpdate(); //Do not replace with enhanced loop, deconstruction will throw a ConcurrentModificationExceptions
                     if(livingParticles.size() == oldSize-1){
+                        i--;
+                    }
+                }
+
+                //Updates for dropped items
+                for (int i = 0 ; i < livingDroppedItems.size(); i++) {
+                    int oldSize = livingDroppedItems.size();
+                    livingDroppedItems.get(i).onUpdate(); //Do not replace with enhanced loop, deconstruction will throw a ConcurrentModificationExceptions
+                    if(livingDroppedItems.size() == oldSize-1){
                         i--;
                     }
                 }
@@ -163,7 +179,7 @@ public class Game{
         tiles = owg.generate(tiles, "Overworld");
 
         System.out.println();
-        System.out.println("Beginning Tile texture generation...");
+        System.out.println("Beginning AllClasses.Tile texture generation...");
         long startTime = System.nanoTime();
         for (int x = 0; x < tiles.length; x++) {
             System.out.printf("%07.3f%% (%0" + String.valueOf(tiles.length * tiles[0].length).length() + "d/%0" + String.valueOf(tiles.length * tiles[0].length).length() + "d)\n", ((double) (x*100)/ tiles.length), x * tiles[0].length, tiles.length * tiles[0].length); //Don't move to y loop, will double time to generate textures due to printing
@@ -173,10 +189,9 @@ public class Game{
             }
         }
         System.out.println("100.000% (" + tiles.length * tiles[0].length + "/" + tiles.length * tiles[0].length + ")");
-        System.out.println("Tile texture generation complete");
+        System.out.println("AllClasses.Tile texture generation complete");
         System.out.println("Completed in " + (int) ((System.nanoTime() - startTime)*0.000001) + " Milliseconds");
         chunks = new TileGraphics[tiles.length];
-
 
         for (int y = 0; y < tiles[playerSpawnX].length; y++) {
             if(tiles[playerSpawnX][y].itemID != ItemID.TILE_AIR && tiles[playerSpawnX][y].itemID != ItemID.TILE_AIR){
@@ -185,6 +200,8 @@ public class Game{
                 break;
             }
         }
+
+        livingDroppedItems.add(new DroppedItem(64, 620, 0, 16, 16, ImageProcessing.getImageFromResources("textures/tiles/fullTiles/dirt/dirt0.png"), ItemID.TILE_DIRT, 5));
 
         frame.setTitle("Underminer"); //TODO: Come up with, and add, a proper title.
         //Maybe Midget Miner?

@@ -1,3 +1,6 @@
+package AllClasses;
+
+import UniqueIDs.ItemID;
 import java.util.ArrayList;
 
 public interface TileGeneration {
