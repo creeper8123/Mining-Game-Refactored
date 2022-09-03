@@ -119,14 +119,17 @@ public class ImageProcessing{
                 rO = myColour.getRed();
                 gO = myColour.getGreen();
                 bO = myColour.getBlue();
-                if(rO == NULL_COLOR.getRed() && gO == NULL_COLOR.getGreen() && bO == NULL_COLOR.getBlue()){
+                if(aO == 0){
                     myColour = new Color(baseBufferedImage.getRGB(x, y), true);
                     aB = myColour.getAlpha();
                     rB = myColour.getRed();
                     gB = myColour.getGreen();
                     bB = myColour.getBlue();
                     col = ((aB&0x0ff)<<24)|((rB&0x0ff)<<16)|((gB&0x0ff)<<8)|(bB&0x0ff);
+                }else if(aO == 255){
+                    col = ((aO&0x0ff)<<24)|((rO&0x0ff)<<16)|((gO&0x0ff)<<8)|(bO&0x0ff);
                 }else{
+                    //TODO: Add colour blending
                     col = ((aO&0x0ff)<<24)|((rO&0x0ff)<<16)|((gO&0x0ff)<<8)|(bO&0x0ff);
                 }
                 newImage.setRGB(x, y, col);
@@ -225,5 +228,13 @@ public class ImageProcessing{
             }
         }
         return inputBufferedImage;
+    }
+
+    public static Color overlayColorWithAlpha(Color baseColor, Color topColor){
+        float factor = topColor.getAlpha()/255f;
+        int r = (int) (baseColor.getRed() * (1 - factor) + topColor.getRed() * factor);
+        int g = (int) (baseColor.getGreen() * (1 - factor) + topColor.getGreen() * factor);
+        int b = (int) (baseColor.getBlue() * (1 - factor) + topColor.getBlue() * factor);
+        return new Color(r, g, b, 255);
     }
 }

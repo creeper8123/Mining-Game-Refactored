@@ -87,7 +87,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                 this.menu.setText(fullMenuDisplayContents);
             }
         };
-        this.inventoryMenu.setMenuTitle("---AllClasses.Player Inventory---");
+        this.inventoryMenu.setMenuTitle("---Player Inventory---");
         inventoryMenu.setMenuContents(inventory.getInventory(), 210);
         inventoryMenu.setMenuSize(inventoryMenu.menuWidth, inventoryMenu.menuHeight + 45);
         inventoryMenu.addButton(0, inventoryMenu.menuHeight+5, 20, inventoryMenu.menuWidth, "Sort Inventory", () -> {
@@ -110,6 +110,8 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
 
         altMenu = new MenuDisplay<>(300, 0);
         altMenu.setVisibility(false);
+
+        this.inventory.addToInventory(new HoldableObject(ItemID.TILE_CHEST_L1), 1);
     }
 
     /***/boolean upPressed;
@@ -140,7 +142,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                 altMenuTileX = null;
                 altMenuTileY = null;
                 altMenuTileItemID = null;
-                InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
+                InventoryManager.displayCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
             }else{
                 int tileMiddleX = (altMenuTileX * TileGraphics.TILE_WIDTH) + (TileGraphics.TILE_WIDTH/2);
                 int tileMiddleY = (altMenuTileY * TileGraphics.TILE_HEIGHT) + (TileGraphics.TILE_HEIGHT/2);
@@ -152,7 +154,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                     altMenuTileX = null;
                     altMenuTileY = null;
                     altMenuTileItemID = null;
-                    InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
+                    InventoryManager.displayCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
                 }
             }
         }
@@ -286,7 +288,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                     altMenuTileX = null;
                     altMenuTileY = null;
                     altMenuTileItemID = null;
-                    InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
+                    InventoryManager.displayCraftingMenuInAltMenu("---Crafting (Hand)---", handCraftingItems);
                 }
             }
         }
@@ -311,7 +313,6 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
                 this.y = 0;
             }
         }
-        //System.out.println(e.getKeyChar() + " (" + e.getKeyCode() + ")" + " released");
     }
 
 
@@ -330,7 +331,7 @@ public class Player extends MovingObject implements KeyListener, MouseListener {
         if(Math.sqrt(Math.pow(tileMiddleX-playerMiddleX, 2)+Math.pow(tileMiddleY-playerMiddleY, 2)) < PLAYER_REACH){
             if(e.getButton() == 1){
                 if(Game.tiles[tileX][tileY].canBeBroken){
-                    Game.tiles[tileX][tileY].whenBroken(Game.tiles, tileX, tileY);
+                    Game.tiles[tileX][tileY].whenBroken(Game.tiles, tileX, tileY, true);
                 }
             //TODO: Disable manual random updates after testing (remove all button 2 code).
             }else if(e.getButton() == 2){

@@ -1,5 +1,6 @@
 package AllClasses;
 
+import UniqueIDs.GameState;
 import UniqueIDs.ItemID;
 
 import java.awt.*;
@@ -85,7 +86,7 @@ class Tile extends HoldableObject {
     }
 
 
-    public void whenBroken(Tile[][] tiles, int x, int y) {
+    public void whenBroken(Tile[][] tiles, int x, int y, boolean dropItems) {
         if (tiles[x][y].itemID != ItemID.TILE_AIR) {
             Game.tiles[x][y] = TilePresets.getTilePreset(x * TileGraphics.TILE_WIDTH, y * TileGraphics.TILE_HEIGHT, TileGraphics.TILE_WIDTH, TileGraphics.TILE_HEIGHT, ItemID.TILE_AIR);
             triggerUpdate(tiles, x, y);
@@ -93,8 +94,10 @@ class Tile extends HoldableObject {
                 Game.chunks[x].yValues.add(y);
             }
         }
-        for (ItemStack droppedItemStack : droppedItemStacks) {
-            Game.livingDroppedItems.add(new DroppedItem(((x * TileGraphics.TILE_WIDTH) + (double) (TileGraphics.TILE_WIDTH/2))-8, ((y * TileGraphics.TILE_HEIGHT) + (double) (TileGraphics.TILE_HEIGHT/2))-8, 0, 16, 16, this.generateTexture(droppedItemStack.holdableObject.itemID), droppedItemStack.holdableObject.itemID, droppedItemStack.quantity));
+        if(dropItems && (Game.currentGameState == GameState.CHUNK_GENERATION || Game.currentGameState == GameState.NORMAL_GAMEPLAY)){
+            for (ItemStack droppedItemStack : droppedItemStacks) {
+                Game.livingDroppedItems.add(new DroppedItem(((x * TileGraphics.TILE_WIDTH) + (double) (TileGraphics.TILE_WIDTH/2))-8, ((y * TileGraphics.TILE_HEIGHT) + (double) (TileGraphics.TILE_HEIGHT/2))-8, 0, 16, 16, this.generateTexture(droppedItemStack.holdableObject.itemID), droppedItemStack.holdableObject.itemID, droppedItemStack.quantity));
+            }
         }
     }
 

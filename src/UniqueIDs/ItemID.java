@@ -11,7 +11,7 @@ AllClasses.HoldableObject.generateDisplayName(itemID);                 //Only if
 AllClasses.HoldableObject.getCraftingRecipe(itemID);                   //Only if item can be crafted.
 AllClasses.HoldableObject.whenUsed(int x, int y, AllClasses.MovingObject usedBy); //Only if the item has a use or can be placed (IE is not an intermediate crafting item)
 AllClasses.InventoryManager.getStackSize(itemID);                      //Only if item is intended to be held.
-Tiles.Tile.AllClasses.TilePresets.getTilePreset();                     //For tiles only
+AllClasses.TilePresets.getTilePreset();                     //For tiles only
 AllClasses.TileGeneration.xyzGeneration();                             //For tiles only, and only if naturally occurring.
 */
 public enum ItemID {
@@ -35,5 +35,6 @@ public enum ItemID {
     TILE_TREE_STARTER,
     ITEM_STICK,
     TILE_WORKBENCH_L1,
-    TILE_FURNACE_L1
+    TILE_FURNACE_L1,
+    TILE_CHEST_L1
 }

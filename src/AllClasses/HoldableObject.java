@@ -29,7 +29,7 @@ public class HoldableObject{
         int tileX = x/ TileGraphics.TILE_WIDTH;
         int tileY = y/ TileGraphics.TILE_HEIGHT;
         switch(itemID){
-            case TILE_AIR, TILE_DIRT, TILE_DIRT_GRASS, TILE_STONE, TILE_COAL_ORE, TILE_COPPER_ORE, TILE_TIN_ORE, TILE_IRON_ORE, TILE_GOLD_ORE, TILE_DIAMOND_ORE, TILE_STALAGMITE, TILE_STALACTITE, TILE_LOG, TILE_LEAVES, TILE_LEAFY_LOG, TILE_TREE_STARTER, TILE_WOOD , TILE_WORKBENCH_L1, TILE_FURNACE_L1 -> {
+            case TILE_AIR, TILE_DIRT, TILE_DIRT_GRASS, TILE_STONE, TILE_COAL_ORE, TILE_COPPER_ORE, TILE_TIN_ORE, TILE_IRON_ORE, TILE_GOLD_ORE, TILE_DIAMOND_ORE, TILE_STALAGMITE, TILE_STALACTITE, TILE_LOG, TILE_LEAVES, TILE_LEAFY_LOG, TILE_TREE_STARTER, TILE_WOOD , TILE_WORKBENCH_L1, TILE_FURNACE_L1, TILE_CHEST_L1 -> {
                 if(Game.tiles[tileX][tileY].itemID == ItemID.TILE_AIR && usedBy.nonSolidTiles.contains(this.itemID) || !usedBy.hitbox.intersects(Game.tiles[tileX][tileY].hitbox)){
                     Tile.placeTile(tileX, tileY, itemID, usedBy, false);
                 }
@@ -216,8 +216,9 @@ public class HoldableObject{
             case TILE_LEAVES, TILE_TREE_STARTER -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/leaves.png");
             case TILE_LEAFY_LOG -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/leafy_log.png");
             case TILE_WOOD -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/wood_planks.png");
-            case TILE_WORKBENCH_L1 -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/workstations/workbench.png");
+            case TILE_WORKBENCH_L1 -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/workstations/workbench.png"); //TODO: remove pixels with 1 alpha in workbench texture file
             case TILE_FURNACE_L1 -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/workstations/furnace.png");
+            case TILE_CHEST_L1 -> finalImage = ImageProcessing.getImageFromResources("textures/tiles/fullTiles/workstations/chest.png");
             default -> finalImage = ImageProcessing.getImageFromResources("textures/missingTexture.png");
         }
         return finalImage;
@@ -233,20 +234,20 @@ public class HoldableObject{
             case TILE_WORKBENCH_L1 -> {
                 items[0] = new ItemStack(ItemID.TILE_WOOD, 2);
                 items[1] = new ItemStack(ItemID.TILE_DIRT, 3);
-                return items;
             }
             case ITEM_PINE_CONE -> {
                 items[0] = new ItemStack(ItemID.ITEM_STICK, 3);
-                return items;
             }
             case TILE_FURNACE_L1 -> {
                 items[0] = new ItemStack(ItemID.TILE_WOOD, 3);
                 items[1] = new ItemStack(ItemID.TILE_STONE, 10);
                 items[2] = new ItemStack(ItemID.TILE_COAL_ORE, 2);
-                return items;
+            }
+            case TILE_CHEST_L1 -> {
+                items[0] = new ItemStack(ItemID.TILE_WOOD, 6);
             }
         }
-        return null;
+        return items;
     }
 
     /**
@@ -297,6 +298,9 @@ public class HoldableObject{
             }
             case TILE_FURNACE_L1 -> {
                 return "Furnace Lv1";
+            }
+            case TILE_CHEST_L1 -> {
+                return "Chest Lv1";
             }
             default -> {
                 return itemID.toString();

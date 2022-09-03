@@ -118,7 +118,7 @@ public abstract class MovingObject {
     /**The current vertical speed of the object.*/double ySpeed = 0.0;
     /**The current horizontal speed the object is trying to reach.*/double xSpeedTarget = 0.0;
     /**The current vertical speed the object is trying to reach.*/double ySpeedTarget = 0.0;
-    /**The amount that the xSpeed will change per update when moving to a different speed.*/double xSpeedAcceleration = 0.16;
+    /**The amount that the xSpeed will change per update when moving to a different speed.*/double xSpeedAcceleration = 0.20;
     /**The maximum xSpeed of the object under normal circumstances.*/double xSpeedLimit = 5;
     /**The multiplier of xSpeedLimit when the object is trying to sprint.*/double sprintSpeedMultiplier = 1.33;
     /**The value that the ySpeed will be set to if the object is touching the ground and the up flag is set.*/double jumpForce = 10;

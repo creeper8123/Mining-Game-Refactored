@@ -1,5 +1,6 @@
 package AllClasses;
 
+import UniqueIDs.GameState;
 import UniqueIDs.ItemID;
 
 import javax.imageio.ImageIO;
@@ -40,6 +41,7 @@ public class Game{
     /**The current iteration that the game is on. Updated as the final step of each tick*/public static long updateNum = 0;
     /**The flag to save all the chunk textures to a .png file.*/public static final boolean SAVE_MAP_AS_PHOTO = true;
     public static long startTime = 0;
+    public static UniqueIDs.GameState currentGameState;
     /**The task that defines what happens in a game tick.*/public static TimerTask mainGameLoopTask = new TimerTask() {
         @Override
         public void run() {
@@ -127,6 +129,7 @@ public class Game{
      */
     public Game(){
         //TODO: Have multiple different levels, and re-call the texture generation methods on the fly for each separate level. A loading screen will be necessary.
+        currentGameState = GameState.WORLD_GENERATION;
         tiles = new Tile[256][256]; //[# of chunks][height of each chunk], limit is 100,000 tiles per level.
         backgroundTiles = new Tile[tiles.length][tiles[0].length];
 
@@ -178,6 +181,7 @@ public class Game{
         };
         tiles = owg.generate(tiles, "Overworld");
 
+        currentGameState = GameState.TEXTURE_GENERATION;
         System.out.println();
         System.out.println("Beginning AllClasses.Tile texture generation...");
         long startTime = System.nanoTime();
@@ -196,15 +200,17 @@ public class Game{
         for (int y = 0; y < tiles[playerSpawnX].length; y++) {
             if(tiles[playerSpawnX][y].itemID != ItemID.TILE_AIR && tiles[playerSpawnX][y].itemID != ItemID.TILE_AIR){
                 player = new Player(playerSpawnX * TileGraphics.TILE_WIDTH, (y * TileGraphics.TILE_HEIGHT)-Player.PLAYER_HEIGHT);
-                InventoryManager.createCraftingMenuInAltMenu("---Crafting (Hand)---", Player.handCraftingItems);
+                InventoryManager.displayCraftingMenuInAltMenu("---Crafting (Hand)---", Player.handCraftingItems);
                 break;
             }
         }
 
-        livingDroppedItems.add(new DroppedItem(64, 620, 0, 16, 16, ImageProcessing.getImageFromResources("textures/tiles/fullTiles/dirt/dirt0.png"), ItemID.TILE_DIRT, 5));
-
         frame.setTitle("Underminer"); //TODO: Come up with, and add, a proper title.
-        //Maybe Midget Miner?
+        /*
+        ---NAME IDEAS---
+        Midget Miner?
+        Polybius 2
+         */
 
         startUpdating();
     }
@@ -260,6 +266,7 @@ public class Game{
     }
 
     private static void startUpdating(){
+        currentGameState = GameState.CHUNK_GENERATION;
         Game.mainGameLoop = new Timer();
         Game.mainGameLoop.scheduleAtFixedRate(mainGameLoopTask, 0, MILLISECONDS_PER_UPDATE);
 
@@ -279,6 +286,7 @@ public class Game{
             System.out.println("100.000% (" + chunks.length + "/" + chunks.length + ")");
             System.out.println("Chunk texture stitching complete");
             System.out.println("Completed in " + (int) ((System.nanoTime() - startTime1)*0.000001) + " Milliseconds");
+            currentGameState = GameState.NORMAL_GAMEPLAY;
             if(Game.SAVE_MAP_AS_PHOTO){
                 System.out.println();
                 System.out.println("Saving textures as photo...");

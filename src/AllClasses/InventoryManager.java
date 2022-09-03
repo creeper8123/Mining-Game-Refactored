@@ -3,6 +3,7 @@ package AllClasses;
 import UniqueIDs.ItemID;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -57,6 +58,9 @@ public class InventoryManager {
             case TILE_FURNACE_L1 -> {
                 return 2;
             }
+            case TILE_CHEST_L1 -> {
+                return 6;
+            }
         }
         return Integer.MAX_VALUE;
     }
@@ -75,7 +79,7 @@ public class InventoryManager {
         }
     }
 
-    public static void createCraftingMenuInAltMenu(String title, ItemStack[] items){
+    public static void displayCraftingMenuInAltMenu(String title, ItemStack[] items){
         AtomicInteger craftingQuantity = new AtomicInteger(1);
         Game.player.altMenu.deconstruct(true);
         Game.player.altMenu = new MenuDisplay<>(350, 50){
@@ -193,6 +197,64 @@ public class InventoryManager {
 
             }
         });
+
+        Game.player.altMenu.setVisibility(true);
+        Game.player.inventoryMenu.setVisibility(true);
+    }
+
+    public static void displayStorageInventoryInAltMenu(String title, InventoryManager inventory){
+
+        Game.player.altMenu.deconstruct(true);
+        Game.player.altMenu = new MenuDisplay<>(350, 50){
+            @Override
+            public void configureMenuContents(){
+                this.menuDisplayContents = new String[menuContents.length];
+                for (int i = 0; i < this.menuDisplayContents.length; i++) {
+                    if(i == selectedItem){
+                        if(this.menuContents[i] == null || this.menuContents[i].holdableObject == null || this.menuContents[i].holdableObject.itemID == null){
+                            this.menuDisplayContents[i] = "&gt[Empty]&lt";
+                        }else{
+                            this.menuDisplayContents[i] = "&gt[" + this.menuContents[i].holdableObject.displayName + " *" + this.menuContents[i].quantity + "]&lt";
+                        }
+                    }else{
+                        if(this.menuContents[i] == null || this.menuContents[i].holdableObject == null || this.menuContents[i].holdableObject.itemID == null){
+                            this.menuDisplayContents[i] = "&#8194[Empty]&#8194";
+                        }else{
+                            this.menuDisplayContents[i] = "&#8194[" + this.menuContents[i].holdableObject.displayName + " *" + this.menuContents[i].quantity + "]&#8194";
+                        }
+                    }
+                }
+                this.fullMenuDisplayContents = "<html><body><u>" + menuTitle + "</u>";
+                for (String menuDisplayContent : this.menuDisplayContents)
+                    this.fullMenuDisplayContents += "<br>" + menuDisplayContent;
+                this.fullMenuDisplayContents += "<br/><br/><br/><br/>"; //Add a <br/> for every line break
+
+                this.menu.setText(fullMenuDisplayContents);
+            }
+        };
+
+        Game.player.altMenu.setMenuTitle(title);
+        Game.player.altMenu.setMenuContents(inventory.getInventory());
+        Game.player.altMenu.setMenuSize(212, (Game.player.altMenu.menuContents.length + 4) * MenuDisplay.STANDARD_TEXT_HEIGHT_PIXELS);
+        Game.player.altMenu.configureMenuContents();
+
+        Game.player.altMenu.addButton(0, ((Game.player.altMenu.menuContents.length + 1) * MenuDisplay.STANDARD_TEXT_HEIGHT_PIXELS)+5, 20, 212, "Transfer from inv to chest", () -> {
+            if (Game.player.inventoryMenu.selectedItem > -1 && Game.player.altMenu.selectedItem > -1){
+                if(((Game.player.inventory.getInventorySlot(Game.player.inventoryMenu.selectedItem).holdableObject != null || inventory.getInventorySlot(Game.player.altMenu.selectedItem).holdableObject == null) || (Game.player.inventory.getInventorySlot(Game.player.inventoryMenu.selectedItem).holdableObject != null))){
+                    if(inventory.getInventorySlot(Game.player.altMenu.selectedItem).holdableObject != null && Game.player.inventory.getInventorySlot(Game.player.inventoryMenu.selectedItem).holdableObject.itemID == inventory.getInventorySlot(Game.player.altMenu.selectedItem).holdableObject.itemID){
+                        inventory.addToInventory(Game.player.inventory.getInventorySlot(Game.player.inventoryMenu.selectedItem).holdableObject, Game.player.inventory.getInventorySlot(Game.player.inventoryMenu.selectedItem).quantity - Game.player.inventory.removeFromInventory(Game.player.inventory.getInventorySlot(Game.player.inventoryMenu.selectedItem).holdableObject, Game.player.inventory.getInventorySlot(Game.player.inventoryMenu.selectedItem).quantity, Game.player.inventoryMenu.selectedItem), Game.player.altMenu.selectedItem);
+                    }
+                }
+            }
+            Game.player.altMenu.configureMenuContents();
+        });
+        Game.player.altMenu.addButton(0, ((Game.player.altMenu.menuContents.length + 1) * MenuDisplay.STANDARD_TEXT_HEIGHT_PIXELS)+25, 20, 212, "Transfer from chest to inv", () -> {
+            if (Game.player.inventoryMenu.selectedItem > -1 && Game.player.altMenu.selectedItem > -1 && ((inventory.getInventorySlot(Game.player.altMenu.selectedItem).holdableObject != null && Game.player.inventory.getInventorySlot(Game.player.inventoryMenu.selectedItem).holdableObject == null) || (Game.player.inventory.getInventorySlot(Game.player.inventoryMenu.selectedItem).holdableObject != null && inventory.getInventorySlot(Game.player.altMenu.selectedItem).holdableObject != null && inventory.getInventorySlot(Game.player.altMenu.selectedItem).holdableObject.itemID == Game.player.inventory.getInventorySlot(Game.player.inventoryMenu.selectedItem).holdableObject.itemID))) {
+                Game.player.inventory.addToInventory(inventory.getInventorySlot(Game.player.altMenu.selectedItem).holdableObject, inventory.getInventorySlot(Game.player.altMenu.selectedItem).quantity - inventory.removeFromInventory(inventory.getInventorySlot(Game.player.altMenu.selectedItem).holdableObject, inventory.getInventorySlot(Game.player.altMenu.selectedItem).quantity, Game.player.altMenu.selectedItem), Game.player.inventoryMenu.selectedItem);
+            }
+            Game.player.altMenu.configureMenuContents();
+        });
+
         Game.player.altMenu.setVisibility(true);
         Game.player.inventoryMenu.setVisibility(true);
     }
